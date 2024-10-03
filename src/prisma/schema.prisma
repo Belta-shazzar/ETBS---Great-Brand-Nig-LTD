@@ -1,0 +1,90 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+model Event {
+  id              String       @id @default(uuid()) @db.Uuid
+  name            String       @db.VarChar(100)
+  totalTicket     Int
+  availableTicket Int
+  startAt         DateTime
+  endAt           DateTime
+  status          EventStatus
+  waitList        WaitList[]
+  bookings        Booking[]
+  createdAt       DateTime     @default(now())
+  updatedAt       DateTime     @updatedAt
+  deletedAt       DateTime?
+}
+
+model User {
+  id           String    @id @default(uuid()) @db.Uuid
+  name         String    @db.VarChar(100)
+  email        String    @db.VarChar(100)
+  phoneNumber  String    @db.VarChar(50)
+  waitList     WaitList[]
+  booking      Booking[]
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @updatedAt
+}
+
+model Booking {
+  id           String       @id @default(uuid()) @db.Uuid
+  userId       String       @db.Uuid
+  eventId      String       @db.Uuid
+  ticketNumber String       @db.VarChar(50)
+  status       BookingStatus
+  cancelledBooking CancelledBooking[]
+  createdAt    DateTime     @default(now())
+  updatedAt    DateTime     @updatedAt
+  deletedAt    DateTime?
+
+  // Relationships
+  user         User         @relation(fields: [userId], references: [id])
+  event        Event        @relation(fields: [eventId], references: [id])
+}
+
+model WaitList {
+  id           String       @id @default(uuid()) @db.Uuid
+  userId       String       @db.Uuid
+  eventId      String       @db.Uuid
+  createdAt    DateTime     @default(now())
+  updatedAt    DateTime     @updatedAt
+
+  // Relationships
+  user         User         @relation(fields: [userId], references: [id])
+  event        Event        @relation(fields: [eventId], references: [id])
+}
+
+model CancelledBooking {
+  id          String    @id @default(uuid()) @db.Uuid
+  bookingId   String    @db.Uuid
+  reason      String
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+
+  // Relationship
+  booking     Booking   @relation(fields: [bookingId], references: [id])
+}
+
+// Enum for the booking status
+enum BookingStatus {
+  CONFIRMED
+  CANCELLED
+}
+
+// Enum for the event status
+enum EventStatus {
+ ACTIVE
+ SOLD_OUT
+ CANCELLED
+}
+

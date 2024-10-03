@@ -21,6 +21,7 @@
     "schema": "src/prisma/schema.prisma"
   },
   "dependencies": {
+    "@prisma/client": "5.20.0",
     "class-transformer": "^0.5.1",
     "class-validator": "^0.14.1",
     "compression": "^1.7.4",
