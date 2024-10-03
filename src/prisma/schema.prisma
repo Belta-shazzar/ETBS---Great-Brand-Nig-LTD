@@ -13,6 +13,7 @@ generator client {
 model Event {
   id              String       @id @default(uuid()) @db.Uuid
   name            String       @db.VarChar(100)
+  venue           String
   totalTicket     Int
   availableTicket Int
   startAt         DateTime
@@ -28,8 +29,8 @@ model Event {
 model User {
   id           String    @id @default(uuid()) @db.Uuid
   name         String    @db.VarChar(100)
-  email        String    @db.VarChar(100)
-  phoneNumber  String    @db.VarChar(50)
+  email        String    @db.VarChar(100) @unique
+  phoneNumber  String?    @db.VarChar(50)
   waitList     WaitList[]
   booking      Booking[]
   createdAt    DateTime  @default(now())
@@ -40,7 +41,6 @@ model Booking {
   id           String       @id @default(uuid()) @db.Uuid
   userId       String       @db.Uuid
   eventId      String       @db.Uuid
-  ticketNumber String       @db.VarChar(50)
   status       BookingStatus
   cancelledBooking CancelledBooking[]
   createdAt    DateTime     @default(now())
@@ -67,7 +67,7 @@ model WaitList {
 model CancelledBooking {
   id          String    @id @default(uuid()) @db.Uuid
   bookingId   String    @db.Uuid
-  reason      String
+  reason      String?
   createdAt   DateTime  @default(now())
   updatedAt   DateTime  @updatedAt
 

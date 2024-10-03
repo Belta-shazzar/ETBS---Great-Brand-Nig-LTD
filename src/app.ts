@@ -12,6 +12,7 @@ import { ErrorMiddleware } from "@/middlewares/error.middleware";
 import swaggerJSDoc from "swagger-jsdoc";
 import swaggerUi from "swagger-ui-express";
 import cookieParser from "cookie-parser";
+import { HttpException } from "./exceptions/http.exception";
 
 export class App {
   public app: express.Application;
@@ -54,6 +55,10 @@ export class App {
   private initializeRoutes(routes: Routes[]) {
     routes.forEach((route) => {
       this.app.use("/", route.router);
+    });
+
+    this.app.use((req, res, next) => {
+      throw new HttpException(404, "URL not Found");
     });
   }
 
