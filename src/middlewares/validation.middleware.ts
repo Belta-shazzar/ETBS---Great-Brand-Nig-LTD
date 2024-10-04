@@ -15,7 +15,6 @@ import { NextFunction, Request, Response } from 'express';
 export const ValidationMiddleware = (type: any, skipMissingProperties = false, whitelist = true, forbidNonWhitelisted = true) => {
   return (req: Request, res: Response, next: NextFunction) => {
     const dto = plainToInstance(type, req.body);
-    console.log('In the validation: ', dto)
     validateOrReject(dto, { skipMissingProperties, whitelist, forbidNonWhitelisted })
       .then(() => {
         req.body = dto;

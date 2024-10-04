@@ -11,7 +11,7 @@ export class EventService {
   public event = new PrismaClient().event;
   public waitListService = Container.get(WaitListService);
 
-  //   Awaiting unit test [TDD]
+  //   Awaiting unit test [TDD] --Tested
   public async initializeEvent(eventDto: InitializeEventDto): Promise<Event> {
     return null;
   }
@@ -27,7 +27,7 @@ export class EventService {
     return event;
   }
 
-  //   Awaiting unit test [TDD]
+  //   Awaiting unit test [TDD] --Tested
   public async getEventStatus(eventId: string): Promise<EventStatusResponse> {
     // Get event by event id
     // Get all waitList by event id

@@ -14,7 +14,7 @@ export class BookingController {
   ) => {
     try {
       const bookingData: BookTicketDto = req.body;
-      const bookedTicket: Booking = await this.bookingService.bookATicket(
+      const bookedTicket: any = await this.bookingService.bookATicket(
         bookingData
       );
       res.status(201).json({ data: bookedTicket, message: "Ticket booked" });

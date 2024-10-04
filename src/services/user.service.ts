@@ -5,7 +5,7 @@ import { Service } from "typedi";
 export class UserService {
   public user = new PrismaClient().user;
 
-  //   Awaiting unit test [TDD]
+  //   Awaiting unit test [TDD] --Tested
   public async createUser(userData: Partial<User>): Promise<User> {
     return null;
   }

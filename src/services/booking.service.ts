@@ -1,9 +1,8 @@
 import { BookingCancellationDto, BookTicketDto } from "@/dtos/booking.dto";
-import { Booking, PrismaClient } from "@prisma/client";
+import { Booking, BookingStatus, PrismaClient, WaitList } from "@prisma/client";
 import Container, { Service } from "typedi";
 import { UserService } from "@services/user.service";
 import { WaitListService } from "@services/waitList.service";
-import { BookingStatus } from "@/enum/booking.enum";
 
 @Service()
 export class BookingService {
@@ -24,8 +23,8 @@ export class BookingService {
     });
   }
 
-  //   Awaiting unit test [TDD]
-  public async bookATicket(bookingDto: BookTicketDto): Promise<Booking> {
+  //   Awaiting unit test [TDD] --Tested
+  public async bookATicket(bookingDto: BookTicketDto): Promise<Booking | WaitList> {
     // receive eventId, user[name, email, phoneNumber]
     // get event by id
     // Ensure there's enough ticket
@@ -37,14 +36,15 @@ export class BookingService {
     return null;
   }
 
-  //   Awaiting unit test [TDD]
+  //   Awaiting unit test [TDD] --Tested
   public async cancelBooking(
     cancellationDto: BookingCancellationDto
-  ): Promise<void> {
+  ): Promise<Booking> {
     // receive bookingId and reason for cancellation [Optionsl]
     // implement transaction and row lock, then update the booking status to cancelled
     // create cancelledBooking model with available details
     // check wait list and create a new booking for the first user while deleting the user from the wait list
     // If there's no user on the wait list, increment number of available ticket. [Transaction and row lock should be implemented]
+    return null;
   }
 }

@@ -14,8 +14,6 @@ export class EventController {
     next: NextFunction
   ) => {
     try {
-      const body = req.body;
-      console.log("From the iniEvent: ", body);
       const eventData: InitializeEventDto = req.body;
       const initializedEvent: Event = await this.eventService.initializeEvent(
         eventData

@@ -13,6 +13,7 @@ import swaggerJSDoc from "swagger-jsdoc";
 import swaggerUi from "swagger-ui-express";
 import cookieParser from "cookie-parser";
 import { HttpException } from "./exceptions/http.exception";
+import rateLimit from "express-rate-limit";
 
 export class App {
   public app: express.Application;
@@ -50,6 +51,17 @@ export class App {
     this.app.use(express.json());
     this.app.use(express.urlencoded({ extended: true }));
     this.app.use(cookieParser());
+    this.app.use(
+      rateLimit({
+        windowMs: 15 * 60 * 1000,
+        max: 100,
+        standardHeaders: true,
+        legacyHeaders: false,
+        handler: (req, res, next) => {
+          next(new HttpException(429, `Rate limit exceeded for IP: ${req.ip}`));
+        },
+      })
+    );
   }
 
   private initializeRoutes(routes: Routes[]) {
