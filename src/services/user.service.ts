@@ -5,9 +5,19 @@ import { Service } from "typedi";
 export class UserService {
   public user = new PrismaClient().user;
 
-  //   Awaiting unit test [TDD] --Tested
   public async createUser(userData: Partial<User>): Promise<User> {
-    return null;
+    let user: User = await this.getUserByMail(userData.email);
+
+    if (!user) {
+      user = await this.user.create({
+        data: {
+          name: userData.name,
+          email: userData.email,
+          phoneNumber: userData.phoneNumber,
+        },
+      });
+    }
+    return user;
   }
 
   public async getUserByMail(email: string): Promise<User> {

@@ -21,7 +21,7 @@ export class EventController {
 
       res
         .status(201)
-        .json({ data: initializedEvent, message: "Event initialized" });
+        .json({ message: "Event initialized", data: initializedEvent });
     } catch (error) {
       next(error);
     }
@@ -40,7 +40,7 @@ export class EventController {
 
       res
         .status(200)
-        .json({ data: eventStatus, message: "Event status retrieved" });
+        .json({ message: "Event status retrieved" , data: eventStatus});
     } catch (error) {
       next(error);
     }

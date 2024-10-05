@@ -15,7 +15,7 @@ export class InitializeEventDto {
 
   @IsNumber()
   @Min(1)
-  totalTickets: number;
+  totalTicket: number;
 
   @IsNotEmpty()
   @IsString()

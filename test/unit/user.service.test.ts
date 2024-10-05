@@ -16,7 +16,7 @@ beforeAll(async () => {
 });
 
 beforeEach(async () => {
-  // await prisma.user.deleteMany();
+  await prisma.waitList.deleteMany();
 });
 
 afterAll(async () => {
@@ -24,14 +24,15 @@ afterAll(async () => {
 });
 
 describe("User Service", () => {
-  const userData: Partial<BookTicketDto> = {
-    name: "Agatha",
-    email: "agatha@test.com",
-    phoneNumber: "09000000000",
-  };
-
   it("should return a user", async () => {
+    const userData: Partial<BookTicketDto> = {
+      name: "Agatha",
+      email: "agatha@test.com",
+      phoneNumber: "09000000000",
+    };
+
     const user: User = await userService.createUser(userData);
+
     expect(user).toHaveProperty("id");
     expect(typeof user.id).toBe("string");
   });

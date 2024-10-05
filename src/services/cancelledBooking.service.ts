@@ -1,3 +1,4 @@
+import { BookingCancellationDto } from "@/dtos/booking.dto";
 import { CancelledBooking, PrismaClient } from "@prisma/client";
 import { Service } from "typedi";
 
@@ -6,14 +7,11 @@ export class CancelledBookingService {
   public cancelledBooking = new PrismaClient().cancelledBooking;
 
   public async createCancellationRecord(
-    cancellationData: Partial<CancelledBooking>
+    cancellationData: BookingCancellationDto,
+    transaction: any
   ): Promise<void> {
-    const { bookingId, reason } = cancellationData;
-    await this.cancelledBooking.create({
-      data: {
-        bookingId,
-        reason,
-      },
+    await transaction.cancelledBooking.create({
+      data: cancellationData,
     });
   }
 }

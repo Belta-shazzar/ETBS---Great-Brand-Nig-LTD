@@ -8,9 +8,16 @@ export class WaitListService {
   //   Awaiting unit test [TDD] --Tested
   public async addToWaitList(
     eventId: string,
-    userId: string
+    userId: string,
+    transaction: any
   ): Promise<WaitList> {
-    return null;
+    const waitList: WaitList = await transaction.waitList.create({
+      data: {
+        eventId,
+        userId,
+      },
+    });
+    return waitList;
   }
 
   public async getWaitListByEventId(eventId: string): Promise<WaitList[]> {
@@ -35,8 +42,11 @@ export class WaitListService {
     return oldestOnTheList;
   }
 
-  public async deleteRecordFromList(waitListId: string): Promise<void> {
-    await this.waitList.delete({
+  public async deleteRecordFromList(
+    waitListId: string,
+    transaction: any
+  ): Promise<void> {
+    await transaction.waitList.delete({
       where: {
         id: waitListId,
       },

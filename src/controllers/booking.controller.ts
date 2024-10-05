@@ -2,7 +2,6 @@ import { BookingService } from "@/services/booking.service";
 import Container from "typedi";
 import { Request, Response, NextFunction } from "express";
 import { BookingCancellationDto, BookTicketDto } from "@/dtos/booking.dto";
-import { Booking } from "@prisma/client";
 
 export class BookingController {
   public bookingService = Container.get(BookingService);
@@ -17,7 +16,12 @@ export class BookingController {
       const bookedTicket: any = await this.bookingService.bookATicket(
         bookingData
       );
-      res.status(201).json({ data: bookedTicket, message: "Ticket booked" });
+
+      const message: string = bookedTicket.status
+        ? "Ticket booked successfully"
+        : "You have been added to the wait list as tickets are currently unavailable";
+
+      res.status(200).json({ message, data: bookedTicket });
     } catch (error) {
       next(error);
     }

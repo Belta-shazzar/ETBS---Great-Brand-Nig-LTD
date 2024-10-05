@@ -1,19 +1,26 @@
 import { InitializeEventDto } from "@/dtos/event.dto";
 import { HttpException } from "@/exceptions/http.exception";
 import { EventStatusResponse } from "@/interfaces/event.interface";
-import { Event, PrismaClient } from "@prisma/client";
+import { Event, EventStatus, PrismaClient, WaitList } from "@prisma/client";
 import Container, { Service } from "typedi";
 import { WaitListService } from "@services/waitList.service";
 import { UpdateEventOption } from "@/enum/event.enum";
 
 @Service()
 export class EventService {
-  public event = new PrismaClient().event;
+  public prisma = new PrismaClient();
+  public event = this.prisma.event;
   public waitListService = Container.get(WaitListService);
 
-  //   Awaiting unit test [TDD] --Tested
   public async initializeEvent(eventDto: InitializeEventDto): Promise<Event> {
-    return null;
+    const event: Event = await this.event.create({
+      data: {
+        ...eventDto,
+        availableTicket: eventDto.totalTicket,
+        status: EventStatus.ACTIVE,
+      },
+    });
+    return event;
   }
 
   public async getEventById(eventId: string): Promise<Event> {
@@ -27,17 +34,31 @@ export class EventService {
     return event;
   }
 
-  //   Awaiting unit test [TDD] --Tested
-  public async getEventStatus(eventId: string): Promise<EventStatusResponse> {
-    // Get event by event id
-    // Get all waitList by event id
-    // return an object of partial event and waitlist count
-    return null;
+  public async getEventInLockedMode(
+    eventId: string,
+    transaction: any
+  ): Promise<any> {
+    const [eventWithLock] = await transaction.$queryRaw`
+      SELECT "availableTicket" 
+      FROM "Event" 
+      WHERE id = ${eventId}::uuid
+      FOR UPDATE;
+    `;
+    return eventWithLock;
   }
 
-  public async updateEventTotalAndAvailableTicket(
+  public async getEventStatus(eventId: string): Promise<EventStatusResponse> {
+    const event: Event = await this.getEventById(eventId);
+    const waitList: WaitList[] =
+      await this.waitListService.getWaitListByEventId(event.id);
+
+    return { event, waitListCount: waitList.length };
+  }
+
+  public async updateEventAvailableTicket(
     eventId: string,
-    updateEventOption: UpdateEventOption
+    updateEventOption: UpdateEventOption,
+    transaction: any
   ): Promise<void> {
     const updateData =
       updateEventOption === UpdateEventOption.INCREMENT
@@ -52,7 +73,7 @@ export class EventService {
             },
           };
 
-    const updatedEvent = await this.event.update({
+    await transaction.event.update({
       where: { id: eventId },
       data: updateData,
     });
