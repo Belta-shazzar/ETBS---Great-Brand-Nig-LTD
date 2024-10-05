@@ -1,11 +1,9 @@
 import "reflect-metadata";
-import Container from "typedi";
 import {
   PrismaClient,
   Booking,
   Event,
   BookingStatus,
-  WaitList,
 } from "@prisma/client";
 import { BookingService } from "../../src/services/booking.service";
 import { EventService } from "../../src/services/event.service";
@@ -30,8 +28,8 @@ beforeAll(async () => {
   // await prisma.booking.deleteMany();
   // await prisma.event.deleteMany();
 
-  bookingService = Container.get(BookingService);
-  eventService = Container.get(EventService);
+  bookingService = new BookingService();
+  eventService = new EventService();
 });
 
 afterAll(async () => {
@@ -59,8 +57,7 @@ describe("Booking Service", () => {
         phoneNumber: "08000000000",
       };
 
-      const bookingResponse: Booking | WaitList =
-        await bookingService.bookATicket(bookingDto);
+      const bookingResponse: any = await bookingService.bookATicket(bookingDto);
 
       expect(bookingResponse).toHaveProperty("id");
       expect(bookingResponse).toHaveProperty("userId");

@@ -40,17 +40,7 @@ export class BookingService {
   }
 
   public async bookATicket(bookingDto: BookTicketDto): Promise<any> {
-    let bookingResponse: any;
     const { eventId, name, email, phoneNumber } = bookingDto;
-    const confirmEvent: Event = await this.eventService.getEventById(
-      bookingDto.eventId
-    );
-    if (
-      confirmEvent.status === EventStatus.CANCELLED ||
-      dayjs(confirmEvent.endAt).isBefore(dayjs())
-    )
-      throw new HttpException(400, "Event date is past");
-
     const user: User = await this.userService.createUser({
       name,
       email,
@@ -59,26 +49,33 @@ export class BookingService {
 
     // Begin transaction process
     return await this.prisma.$transaction(async (transaction) => {
+      let bookingResponse: any;
       const event: Event = await this.eventService.getEventInLockedMode(
-        bookingDto.eventId,
+        eventId,
         transaction
       );
 
+      if (
+        event.status === EventStatus.CANCELLED ||
+        dayjs(event.endAt).isBefore(dayjs())
+      )
+        throw new HttpException(400, "Event date is past");
+
       if (event.availableTicket > 0) {
         bookingResponse = await this.createBooking(
-          eventId,
+          event.id,
           user.id,
           transaction
         );
 
         await this.eventService.updateEventAvailableTicket(
-          eventId,
+          event.id,
           UpdateEventOption.DECREMENT,
           transaction
         );
       } else {
         bookingResponse = await this.waitListService.addToWaitList(
-          eventId,
+          event.id,
           user.id,
           transaction
         );
@@ -97,7 +94,6 @@ export class BookingService {
         data: { status: BookingStatus.CANCELLED },
       });
 
-      if (!bookedTicket) throw new HttpException(404, "Booking not found");
       const { eventId } = bookedTicket;
       await this.cancelBookingService.createCancellationRecord(
         cancellationDto,
@@ -120,7 +116,7 @@ export class BookingService {
           transaction
         );
         await this.eventService.updateEventAvailableTicket(
-          eventId,
+          event.id,
           UpdateEventOption.INCREMENT,
           transaction
         );

@@ -5,7 +5,6 @@ import { Service } from "typedi";
 export class WaitListService {
   public waitList = new PrismaClient().waitList;
 
-  //   Awaiting unit test [TDD] --Tested
   public async addToWaitList(
     eventId: string,
     userId: string,

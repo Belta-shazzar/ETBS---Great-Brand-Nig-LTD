@@ -2,14 +2,13 @@ import "reflect-metadata";
 import { PrismaClient, User } from "@prisma/client";
 import { UserService } from "../../src/services/user.service";
 import { BookTicketDto } from "../../src/dtos/booking.dto";
-import Container from "typedi";
 
 let prisma: PrismaClient;
 let userService: UserService;
 
 beforeAll(async () => {
   prisma = new PrismaClient();
-  userService = Container.get(UserService);
+  userService = new UserService();
 
   await prisma.$connect();
   // await prisma.user.deleteMany();

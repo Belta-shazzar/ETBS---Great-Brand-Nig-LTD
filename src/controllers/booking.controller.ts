@@ -35,7 +35,9 @@ export class BookingController {
     try {
       const bookingCancellationData: BookingCancellationDto = req.body;
       await this.bookingService.cancelBooking(bookingCancellationData);
-      res.status(200).json({ data: "", message: "Booking cancelled" });
+      res
+        .status(200)
+        .json({ data: "", message: "Booking cancelled successfully" });
     } catch (error) {
       next(error);
     }

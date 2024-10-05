@@ -3,14 +3,13 @@ import { PrismaClient, Event } from "@prisma/client";
 import { EventService } from "../../src/services/event.service";
 import { InitializeEventDto } from "../../src/dtos/event.dto";
 import { EventStatusResponse } from "../../src/interfaces/event.interface";
-import Container from "typedi";
 
 let prisma: PrismaClient;
 let eventService: EventService
 
 beforeAll(async () => {
   prisma = new PrismaClient();
-  eventService = Container.get(EventService);
+  eventService = new EventService();
 
   await prisma.$connect();
   // await prisma.user.deleteMany();

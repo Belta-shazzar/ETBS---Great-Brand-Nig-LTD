@@ -1,5 +1,5 @@
 import { BookingCancellationDto } from "@/dtos/booking.dto";
-import { CancelledBooking, PrismaClient } from "@prisma/client";
+import { PrismaClient } from "@prisma/client";
 import { Service } from "typedi";
 
 @Service()

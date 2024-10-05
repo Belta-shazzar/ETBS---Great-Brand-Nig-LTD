@@ -39,11 +39,13 @@ export class EventService {
     transaction: any
   ): Promise<any> {
     const [eventWithLock] = await transaction.$queryRaw`
-      SELECT "availableTicket" 
+      SELECT * 
       FROM "Event" 
       WHERE id = ${eventId}::uuid
       FOR UPDATE;
     `;
+
+    if (!eventWithLock) throw new HttpException(404, "Event not found");
     return eventWithLock;
   }
 
