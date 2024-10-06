@@ -4,18 +4,29 @@ This project was built using a class-based architecture to promote a more organi
 
 Prisma was chosen as the ORM because of its intuitive, type-safe query system and strong support for TypeScript. It simplifies database interactions by providing an abstraction layer that reduces the complexity of raw SQL queries while maintaining performance. Prisma's migration system ensures smooth schema evolution, making it easier to maintain and update the database structure as the project grows. Its integration with TypeScript enhances type safety, preventing runtime errors and making the code more robust.
 
+## Dockerized Development and Test Environments
+
+This application has been fully dockerized to ease development and testing processes. This allows isolation of the Postgres database, ensuring consistency across different environments.
+
+
+
 ## Local Development Setup
 
 Docker and Git are Prerequisites.
 
 - Clone the repository
-- Create a `.env` file and fill in the required fields. See `.env.example` for blueprint.
-- Run `yarn install` or `yarn` to install all project dependency
-- Run `docker compose up` to start the postgres container used in this application
+- Create a `.env` file and fill in the required fields. See `.env.example` for blueprint. (For the database url, get it from the docker-compose.dev.yml)
+- Run `./pendt.sh -e dev -c up-build` to build and start the dev container
+- Run `./pendt.sh -e dev -c exec -s server -r "npm run prisma:migrate" ` to sync the database with the prisma defines models
 - Connect to the database with your preferred database client
-- Run `yarn prisma:migrate` to sync the Prisma models with your database in development mode.
-- Run `yarn dev` to start the server in development mode
-- Run `yarn test` to execute the test suite
+- Test endpoints on your preferred API testing tool
+
+## Test set up
+- Clone the repository
+- Run `./pendt.sh -e test -c up-build` to build and start/run the test container
+
+
+> **Note:** For additional Docker-related commands, please refer to the `pendt-script-README.md` file.
 
 ## Entity Relational Diagram
 
