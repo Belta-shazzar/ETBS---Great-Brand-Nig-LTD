@@ -1,4 +1,4 @@
-# PENDT Docker Compose Management Script
+# start Docker Compose Management Script
 
 This script simplifies the management of Docker Compose environments (`development` and `test`) by providing an easy way to execute common Docker commands using flags.
 
@@ -10,7 +10,7 @@ This script simplifies the management of Docker Compose environments (`developme
 ## Usage
 
 ```bash
-./pendt.sh [-e environment] [-c command] [-s service] [-r command to run]
+./start.sh [-e environment] [-c command] [-s service] [-r command to run]
 ```
 
 ### Parameters
@@ -28,7 +28,7 @@ Starts the containers for the specified environment.
 
 - **Example**:
   ```bash
-  ./pendt.sh -e dev -c up
+  ./start.sh -e dev -c up
   ```
 
 ### 2. **up-build**
@@ -37,7 +37,7 @@ Builds and starts the containers for the specified environment.
 
 - **Example**:
   ```bash
-  ./pendt.sh -e test -c up-build
+  ./start.sh -e test -c up-build
   ```
 
 ### 3. **down**
@@ -46,7 +46,7 @@ Stops and removes the containers for the specified environment.
 
 - **Example**:
   ```bash
-  ./pendt.sh -e dev -c down
+  ./start.sh -e dev -c down
   ```
 
 ### 4. **logs**
@@ -56,12 +56,12 @@ Follows the logs for all services (or a specific service) in the specified envir
 - **All Services**:
 
   ```bash
-  ./pendt.sh -e dev -c logs
+  ./start.sh -e dev -c logs
   ```
 
 - **Specific Service** (e.g., `server`):
   ```bash
-  ./pendt.sh -e dev -c logs -s server
+  ./start.sh -e dev -c logs -s server
   ```
 
 ### 5. **ps**
@@ -70,7 +70,7 @@ Lists all running containers for the specified environment.
 
 - **Example**:
   ```bash
-  ./pendt.sh -e dev -c ps
+  ./start.sh -e dev -c ps
   ```
 
 ### 6. **restart**
@@ -80,12 +80,12 @@ Restarts all containers or a specific service in the specified environment.
 - **Restart All**:
 
   ```bash
-  ./pendt.sh -e test -c restart
+  ./start.sh -e test -c restart
   ```
 
 - **Restart a Specific Service** (e.g., `postgres`):
   ```bash
-  ./pendt.sh -e dev -c restart -s postgres
+  ./start.sh -e dev -c restart -s postgres
   ```
 
 ### 7. **exec**
@@ -94,7 +94,7 @@ Runs a command inside a specific service container.
 
 - **Example** (running `npm run migration` inside the `server` container):
   ```bash
-  ./pendt.sh -e dev -c exec -s server -r "npm run migration"
+  ./start.sh -e dev -c exec -s server -r "npm run migration"
   ```
 
 ### 8. **stop**
@@ -103,7 +103,7 @@ Stops all running containers for the specified environment (without removing the
 
 - **Example**:
   ```bash
-  ./pendt.sh -e dev -c stop
+  ./start.sh -e dev -c stop
   ```
 
 ### 9. **start**
@@ -112,7 +112,7 @@ Starts all previously stopped containers for the specified environment.
 
 - **Example**:
   ```bash
-  ./pendt.sh -e dev -c start
+  ./start.sh -e dev -c start
   ```
 
 ## Examples
@@ -120,28 +120,28 @@ Starts all previously stopped containers for the specified environment.
 - **Start development environment**:
 
   ```bash
-  ./pendt.sh -e dev -c up
+  ./start.sh -e dev -c up
   ```
 
 - **Build and start test environment**:
 
   ```bash
-  ./pendt.sh -e test -c up-build
+  ./start.sh -e test -c up-build
   ```
 
 - **Stop containers for development**:
 
   ```bash
-  ./pendt.sh -e dev -c stop
+  ./start.sh -e dev -c stop
   ```
 
 - **Follow logs for a specific service (server)**:
 
   ```bash
-  ./pendt.sh -e dev -c logs -s server
+  ./start.sh -e dev -c logs -s server
   ```
 
 - **Execute a command inside the `server` container**:
   ```bash
-  ./pendt.sh -e dev -c exec -s server -r "npm run migration"
+  ./start.sh -e dev -c exec -s server -r "npm run migration"
   ```

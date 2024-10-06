@@ -16,17 +16,17 @@ Docker and Git are Prerequisites.
 
 - Clone the repository
 - Create a `.env` file and fill in the required fields. See `.env.example` for blueprint. (For the database url, get it from the docker-compose.dev.yml)
-- Run `./pendt.sh -e dev -c up-build` to build and start the dev container
-- Run `./pendt.sh -e dev -c exec -s server -r "npm run prisma:migrate" ` to sync the database with the prisma defines models
+- Run `./start.sh -e dev -c up-build` to build and start the dev container
+- Run `./start.sh -e dev -c exec -s server -r "npm run prisma:migrate" ` to sync the database with the prisma defines models
 - Connect to the database with your preferred database client
 - Test endpoints on your preferred API testing tool
 
 ## Test set up
 - Clone the repository
-- Run `./pendt.sh -e test -c up-build` to build and start/run the test container
+- Run `./start.sh -e test -c up-build` to build and start/run the test container
 
 
-> **Note:** For additional Docker-related commands, please refer to the `pendt-script-README.md` file.
+> **Note:** For additional Docker-related commands, please refer to the `start-script-README.md` file.
 
 ## Entity Relational Diagram
 
