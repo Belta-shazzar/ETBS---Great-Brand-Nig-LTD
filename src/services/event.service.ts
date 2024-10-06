@@ -2,7 +2,7 @@ import { InitializeEventDto } from "@/dtos/event.dto";
 import { HttpException } from "@/exceptions/http.exception";
 import { EventStatusResponse } from "@/interfaces/event.interface";
 import { Event, EventStatus, PrismaClient, WaitList } from "@prisma/client";
-import Container, { Service } from "typedi";
+import { Service } from "typedi";
 import { WaitListService } from "@services/waitList.service";
 import { UpdateEventOption } from "@/enum/event.enum";
 
@@ -10,7 +10,7 @@ import { UpdateEventOption } from "@/enum/event.enum";
 export class EventService {
   public prisma = new PrismaClient();
   public event = this.prisma.event;
-  public waitListService = Container.get(WaitListService);
+  public waitListService = new WaitListService();
 
   public async initializeEvent(eventDto: InitializeEventDto): Promise<Event> {
     const event: Event = await this.event.create({
@@ -30,7 +30,7 @@ export class EventService {
       },
     });
 
-    if (!event) throw new HttpException(404, "Event doesn't exist");
+    if (!event) throw new HttpException(404, "Event does not exist");
     return event;
   }
 
@@ -45,7 +45,7 @@ export class EventService {
       FOR UPDATE;
     `;
 
-    if (!eventWithLock) throw new HttpException(404, "Event not found");
+    if (!eventWithLock) throw new HttpException(404, "Event does not exist");
     return eventWithLock;
   }
 

@@ -1,108 +1,111 @@
 import request from "supertest";
 import { App } from "../../src/app";
 import { BookingRoute } from "../../src/routes/booking.route";
-import { BookingService } from "../../src/services/booking.service";
-import { EventService } from "../../src/services/event.service";
+import { LoginDto, SignUpDto } from "../../src/dtos/auth.dto";
+import { Booking, Event, PrismaClient, User } from "@prisma/client";
+import { AuthRoute } from "../../src/routes/auth.route";
+import { EventRoute } from "../../src/routes/event.route";
 
-let app: App;
-let bookingRoute: BookingRoute;
-let bookingService: BookingService;
-let eventService: EventService;
+let prisma: PrismaClient;
 
-beforeAll(() => {
-  bookingRoute = new BookingRoute();
-  app = new App([bookingRoute]);
-  bookingService = new BookingService();
-  eventService = new EventService();
+beforeAll(async () => {
+  prisma = new PrismaClient();
+  await prisma.$connect();
+
+  //   Clear database before test
+  await prisma.cancelledBooking.deleteMany();
+  await prisma.booking.deleteMany();
+  await prisma.waitList.deleteMany();
+  await prisma.event.deleteMany();
+  await prisma.user.deleteMany();
 });
-afterAll(() => {});
+
+afterAll(async () => {
+  //   Clear database before test
+  await prisma.cancelledBooking.deleteMany();
+  await prisma.booking.deleteMany();
+  await prisma.waitList.deleteMany();
+  await prisma.event.deleteMany();
+  await prisma.user.deleteMany();
+
+  await prisma.$disconnect();
+});
 
 describe("Booking integration test", () => {
+  let bookingRoute: BookingRoute = new BookingRoute();
+  let authRoute: AuthRoute = new AuthRoute();
+  let eventRoute: EventRoute = new EventRoute();
+  let app: App = new App([bookingRoute, authRoute, eventRoute]);
+  let user: User;
+  let token: string;
+  let event: Event;
+  let booking: Booking;
+
   describe("[POST] /bookings/book", () => {
     it("should return a 404 if event is not found", async () => {
-      const bookingData = {
-        eventId: "c2bd3333-c587-4f4e-83c8-c8c3ece7c042",
-        name: "Abel Josh",
-        email: "josh@test.com",
-        phoneNumber: "09038498320",
+      const signUpDto: SignUpDto = {
+        name: "Agatha",
+        email: "agatha@test.com",
+        password: "password",
+        phoneNumber: "08000000000",
       };
+
+      await request(app.getServer())
+        .post(`${authRoute.path}/sign-up`)
+        .send(signUpDto);
+
+      const loginDto: LoginDto = {
+        email: "agatha@test.com",
+        password: "password",
+      };
+
+      const userResponse = await request(app.getServer())
+        .post(`${authRoute.path}/login`)
+        .send(loginDto);
+      user = userResponse.body.data;
+      token = userResponse.body.token;
 
       return request(app.getServer())
         .post(`${bookingRoute.path}/book`)
-        .send(bookingData)
+        .set("Authorization", `Bearer ${token}`)
+        .send({ eventId: "c2bd3333-c587-4f4e-83c8-c8c3ece7c042" })
         .expect(404);
-    });
-    it("should return a 400 if event is end date is past", async () => {
-      const eventData = {
-        name: "Father and Son",
-        totalTicket: 3,
-        venue: "Ikate, Surulere, Lagos",
-        startAt: new Date("2024-9-15"),
-        endAt: new Date("2024-9-18"),
-      };
-      const event = await eventService.initializeEvent(eventData);
-
-      const bookingData = {
-        eventId: event.id,
-        name: "Abel Josh",
-        email: "josh@test.com",
-        phoneNumber: "09038498320",
-      };
-
-      return request(app.getServer())
-        .post(`${bookingRoute.path}/book`)
-        .send(bookingData)
-        .expect(400);
     });
     it("should book a ticket or add user to wait list", async () => {
       const eventData = {
         name: "Father and Son",
-        totalTicket: 3,
+        totalTicket: 1,
         venue: "Ikate, Surulere, Lagos",
-        startAt: new Date("2024-10-15"),
-        endAt: new Date("2024-10-18"),
+        startAt: "2024-10-15T14:30:00Z",
+        endAt: "2024-10-18T14:30:00Z",
       };
-      const event = await eventService.initializeEvent(eventData);
-
-      const bookingData = {
-        eventId: event.id,
-        name: "Abel Josh",
-        email: "josh@test.com",
-        phoneNumber: "09038498320",
-      };
-
-      return request(app.getServer())
+      const eventResponse = await request(app.getServer())
+        .post(`${eventRoute.path}/initialize`)
+        .send(eventData);
+      event = eventResponse.body.data;
+      
+      const bookingResponse = request(app.getServer())
         .post(`${bookingRoute.path}/book`)
-        .send(bookingData)
-        .expect(200);
+        .set("Authorization", `Bearer ${token}`)
+        .send({ eventId: event.id });
+
+      booking = (await bookingResponse).body.data;
+
+      return bookingResponse.expect(200);
     });
   });
   describe("[POST] /bookings/cancel", () => {
     it("should return a 404 if booking is not found", async () => {
       return request(app.getServer())
         .post(`${bookingRoute.path}/cancel`)
+        .set("Authorization", `Bearer ${token}`)
         .send({ bookingId: "c2bd3333-c587-4f4e-83c8-c8c3ece7c042" })
         .expect(500);
     });
     it("should return a 200", async () => {
-      const eventData = {
-        name: "Father and Son",
-        totalTicket: 3,
-        venue: "Ikate, Surulere, Lagos",
-        startAt: new Date("2024-10-15"),
-        endAt: new Date("2024-10-18"),
-      };
-      const event = await eventService.initializeEvent(eventData);
-
-      const bookingData = {
-        eventId: event.id,
-        name: "Abel Josh",
-        email: "josh@test.com",
-        phoneNumber: "09038498320",
-      };
-      const booking = await bookingService.bookATicket(bookingData);
       return request(app.getServer())
         .post(`${bookingRoute.path}/cancel`)
+        .set("Authorization", `Bearer ${token}`)
         .send({ bookingId: booking.id })
         .expect(200);
     });

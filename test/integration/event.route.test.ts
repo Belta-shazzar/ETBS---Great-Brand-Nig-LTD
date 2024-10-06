@@ -1,19 +1,38 @@
 import request from "supertest";
+import { PrismaClient, Event } from "@prisma/client";
 import { App } from "../../src/app";
 import { EventRoute } from "../../src/routes/event.route";
-import { EventService } from "../../src/services/event.service";
 
-let app: App;
-let eventRoute: EventRoute;
-let eventService: EventService;
-beforeAll(() => {
-  eventRoute = new EventRoute();
-  app = new App([eventRoute]);
-  eventService = new EventService();
+let prisma: PrismaClient;
+
+beforeAll(async () => {
+  prisma = new PrismaClient();
+  await prisma.$connect();
+
+//   Clean up database before test
+  await prisma.cancelledBooking.deleteMany();
+  await prisma.booking.deleteMany();
+  await prisma.waitList.deleteMany();
+  await prisma.event.deleteMany();
+  await prisma.user.deleteMany();
 });
-afterAll(() => {});
+
+afterAll(async () => {
+//   Clean up database after test
+  await prisma.cancelledBooking.deleteMany();
+  await prisma.booking.deleteMany();
+  await prisma.waitList.deleteMany();
+  await prisma.event.deleteMany();
+  await prisma.user.deleteMany();
+
+  await prisma.$disconnect();
+});
 
 describe("Event integration test", () => {
+  const eventRoute: EventRoute = new EventRoute();
+  const app: App = new App([eventRoute]);
+  let event: Event;
+
   describe("[POST] /events/initialize", () => {
     it("should return an error if invalid data is passed", async () => {
       const eventData = {
@@ -26,7 +45,7 @@ describe("Event integration test", () => {
       const response = request(app.getServer())
         .post(`${eventRoute.path}/initialize`)
         .send(eventData);
-        
+
       return response.expect(400);
     });
 
@@ -38,10 +57,12 @@ describe("Event integration test", () => {
         startAt: new Date("2024-10-15"),
         endAt: new Date("2024-10-18"),
       };
-      return request(app.getServer())
+
+      const response = request(app.getServer())
         .post(`${eventRoute.path}/initialize`)
-        .send(eventData)
-        .expect(201);
+        .send(eventData);
+      event = (await response).body.data;
+      return response.expect(201);
     });
   });
   describe("[GET] /events/status", () => {
@@ -52,14 +73,6 @@ describe("Event integration test", () => {
         .expect(404);
     });
     it("should return a 200", async () => {
-      const eventData = {
-        name: "Father and Son",
-        totalTicket: 3,
-        venue: "Ikate, Surulere, Lagos",
-        startAt: new Date("2024-10-15"),
-        endAt: new Date("2024-10-18"),
-      };
-      const event = await eventService.initializeEvent(eventData);
       return request(app.getServer())
         .get(`${eventRoute.path}/status/${event.id}`)
         .expect(200);

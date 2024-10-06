@@ -1,20 +1,23 @@
 import { BookingService } from "@/services/booking.service";
 import Container from "typedi";
-import { Request, Response, NextFunction } from "express";
-import { BookingCancellationDto, BookTicketDto } from "@/dtos/booking.dto";
+import { Response, NextFunction } from "express";
+import { BookingCancellationDto } from "@/dtos/booking.dto";
+import { RequestWithUser } from "@/interfaces/auth.interface";
 
 export class BookingController {
   public bookingService = Container.get(BookingService);
 
   public bookATicket = async (
-    req: Request,
+    req: RequestWithUser,
     res: Response,
     next: NextFunction
   ) => {
     try {
-      const bookingData: BookTicketDto = req.body;
+      const { eventId } = req.body;
+      const { id } = req.user;
       const bookedTicket: any = await this.bookingService.bookATicket(
-        bookingData
+        eventId,
+        id
       );
 
       const message: string = bookedTicket.status
@@ -28,13 +31,14 @@ export class BookingController {
   };
 
   public cancelBooking = async (
-    req: Request,
+    req: RequestWithUser,
     res: Response,
     next: NextFunction
   ) => {
     try {
       const bookingCancellationData: BookingCancellationDto = req.body;
-      await this.bookingService.cancelBooking(bookingCancellationData);
+      const { id } = req.user;
+      await this.bookingService.cancelBooking(bookingCancellationData, id);
       res
         .status(200)
         .json({ data: "", message: "Booking cancelled successfully" });

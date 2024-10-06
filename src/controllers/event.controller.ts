@@ -4,7 +4,6 @@ import { NextFunction, Request, Response } from "express";
 import { InitializeEventDto } from "@/dtos/event.dto";
 import { Event } from "@prisma/client";
 import { EventStatusResponse } from "@/interfaces/event.interface";
-import { HttpException } from "@/exceptions/http.exception";
 
 export class EventController {
   public eventService = Container.get(EventService);

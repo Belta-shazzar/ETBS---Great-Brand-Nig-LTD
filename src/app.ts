@@ -9,9 +9,6 @@ import { Routes } from "@interfaces/routes.interface";
 import { CREDENTIALS, LOG_FORMAT, NODE_ENV, ORIGIN, PORT } from "@/config";
 import { logger, stream } from "@/utils/logger";
 import { ErrorMiddleware } from "@/middlewares/error.middleware";
-import swaggerJSDoc from "swagger-jsdoc";
-import swaggerUi from "swagger-ui-express";
-import cookieParser from "cookie-parser";
 import { HttpException } from "./exceptions/http.exception";
 import rateLimit from "express-rate-limit";
 
@@ -27,7 +24,6 @@ export class App {
 
     this.initializeMiddlewares();
     this.initializeRoutes(routes);
-    this.initializeSwagger();
     this.initializeErrorHandling();
   }
 
@@ -50,7 +46,6 @@ export class App {
     this.app.use(compression());
     this.app.use(express.json());
     this.app.use(express.urlencoded({ extended: true }));
-    this.app.use(cookieParser());
     this.app.use(
       rateLimit({
         windowMs: 15 * 60 * 1000,
@@ -72,22 +67,6 @@ export class App {
     this.app.use((req, res, next) => {
       throw new HttpException(404, "URL not Found");
     });
-  }
-
-  private initializeSwagger() {
-    const options = {
-      swaggerDefinition: {
-        info: {
-          title: "REST API",
-          version: "1.0.0",
-          description: "Example docs",
-        },
-      },
-      apis: ["swagger.yaml"],
-    };
-
-    const specs = swaggerJSDoc(options);
-    this.app.use("/api-docs", swaggerUi.serve, swaggerUi.setup(specs));
   }
 
   private initializeErrorHandling() {

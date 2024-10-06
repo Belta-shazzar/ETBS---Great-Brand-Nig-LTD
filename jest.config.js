@@ -15,4 +15,6 @@ module.exports = {
   moduleNameMapper: pathsToModuleNameMapper(compilerOptions.paths, {
     prefix: "<rootDir>/",
   }),
+  // setupFilesAfterEnv: ["<rootDir>/test/setup.ts"],
+  // globalSetup: "<rootDir>/test/setup.ts",
 };

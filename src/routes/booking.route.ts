@@ -1,6 +1,7 @@
 import { BookingController } from "@/controllers/booking.controller";
-import { BookingCancellationDto, BookTicketDto } from "@/dtos/booking.dto";
+import { BookingCancellationDto } from "@/dtos/booking.dto";
 import { Routes } from "@/interfaces/routes.interface";
+import { AuthMiddleware } from "@/middlewares/auth.middleware";
 import { ValidationMiddleware } from "@/middlewares/validation.middleware";
 import { Router } from "express";
 
@@ -16,12 +17,13 @@ export class BookingRoute implements Routes {
   private initializeRoutes() {
     this.router.post(
       `${this.path}/book`,
-      ValidationMiddleware(BookTicketDto),
+      AuthMiddleware,
       this.bookingController.bookATicket
     );
 
     this.router.post(
       `${this.path}/cancel`,
+      AuthMiddleware,
       ValidationMiddleware(BookingCancellationDto),
       this.bookingController.cancelBooking
     );

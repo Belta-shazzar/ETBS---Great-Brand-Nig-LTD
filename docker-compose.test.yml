@@ -1,0 +1,23 @@
+services:
+  server:
+    container_name: server_test
+    build:
+      context: ./
+      dockerfile: Dockerfile.test
+    environment:
+      DATABASE_URL: postgres://postgres:password@postgres:5432/test_db
+    volumes:
+      - ./:/app
+      - /app/node_modules
+    networks:
+      - backend
+    depends_on:
+      - postgres
+
+  postgres:
+    environment:
+      POSTGRES_DB: test_db  # Database name for testing
+
+networks:
+  backend:
+    external: true

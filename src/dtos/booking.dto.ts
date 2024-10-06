@@ -1,23 +1,4 @@
-import { IsEmail, IsNotEmpty, IsOptional, IsString } from "class-validator";
-
-export class BookTicketDto {
-  @IsNotEmpty()
-  @IsString()
-  eventId: string;
-
-  @IsNotEmpty()
-  @IsString()
-  name: string; //name of the booking user
-
-  @IsNotEmpty()
-  @IsEmail()
-  email: string;
-
-  @IsOptional()
-  @IsString()
-  phoneNumber?: string;
-}
-
+import { IsNotEmpty, IsOptional, IsString } from "class-validator";
 export class BookingCancellationDto {
   @IsNotEmpty()
   @IsString()

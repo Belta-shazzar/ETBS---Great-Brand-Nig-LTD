@@ -1,0 +1,20 @@
+# NodeJS Version 20
+FROM node:20-alpine
+
+# Copy Dir
+COPY . ./app
+
+# Work to Dir
+WORKDIR /app
+
+# Install Node Package
+RUN npm install
+
+# Set Env
+ENV NODE_ENV test
+
+EXPOSE 3000
+
+# Cmd script to run migration before running tests
+CMD ["sh", "-c", "npm run prisma:migrate && npm run test"]
+

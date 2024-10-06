@@ -1,4 +1,4 @@
-import { BookingCancellationDto, BookTicketDto } from "@/dtos/booking.dto";
+import { BookingCancellationDto } from "@/dtos/booking.dto";
 import {
   Booking,
   BookingStatus,
@@ -7,7 +7,6 @@ import {
   EventStatus,
   User,
 } from "@prisma/client";
-import Container, { Service } from "typedi";
 import { UserService } from "@services/user.service";
 import { WaitListService } from "@services/waitList.service";
 import { EventService } from "@services/event.service";
@@ -15,15 +14,17 @@ import dayjs from "dayjs";
 import { HttpException } from "@/exceptions/http.exception";
 import { UpdateEventOption } from "@/enum/event.enum";
 import { CancelledBookingService } from "./cancelledBooking.service";
+import { Service } from "typedi";
 
 @Service()
 export class BookingService {
   public prisma = new PrismaClient();
   public booking = this.prisma.booking;
-  public eventService = Container.get(EventService);
-  public userService = Container.get(UserService);
-  public waitListService = Container.get(WaitListService);
-  public cancelBookingService = Container.get(CancelledBookingService);
+
+  public eventService = new EventService();
+  public userService = new UserService();
+  public waitListService = new WaitListService();
+  public cancelBookingService = new CancelledBookingService();
 
   public async createBooking(
     eventId: string,
@@ -39,13 +40,8 @@ export class BookingService {
     });
   }
 
-  public async bookATicket(bookingDto: BookTicketDto): Promise<any> {
-    const { eventId, name, email, phoneNumber } = bookingDto;
-    const user: User = await this.userService.createUser({
-      name,
-      email,
-      phoneNumber,
-    });
+  public async bookATicket(eventId: string, userId: string): Promise<any> {
+    const user: User = await this.userService.getUserById(userId);
 
     // Begin transaction process
     return await this.prisma.$transaction(async (transaction) => {
@@ -86,11 +82,12 @@ export class BookingService {
   }
 
   public async cancelBooking(
-    cancellationDto: BookingCancellationDto
+    cancellationDto: BookingCancellationDto,
+    userId: string
   ): Promise<Booking> {
     return await this.prisma.$transaction(async (transaction) => {
       const bookedTicket: Booking = await transaction.booking.update({
-        where: { id: cancellationDto.bookingId },
+        where: { id: cancellationDto.bookingId, userId: userId },
         data: { status: BookingStatus.CANCELLED },
       });
 

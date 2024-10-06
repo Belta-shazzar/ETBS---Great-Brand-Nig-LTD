@@ -1,3 +1,5 @@
+import { SignUpDto } from "@/dtos/auth.dto";
+import { HttpException } from "@/exceptions/http.exception";
 import { PrismaClient, User } from "@prisma/client";
 import { Service } from "typedi";
 
@@ -5,22 +7,22 @@ import { Service } from "typedi";
 export class UserService {
   public user = new PrismaClient().user;
 
-  public async createUser(userData: Partial<User>): Promise<User> {
-    let user: User = await this.getUserByMail(userData.email);
+  public async createUser(signUpDto: SignUpDto): Promise<User> {
+    const user = await this.user.create({
+      data: signUpDto,
+    });
 
-    if (!user) {
-      user = await this.user.create({
-        data: {
-          name: userData.name,
-          email: userData.email,
-          phoneNumber: userData.phoneNumber,
-        },
-      });
-    }
     return user;
   }
 
   public async getUserByMail(email: string): Promise<User> {
     return this.user.findUnique({ where: { email: email } });
+  }
+
+  public async getUserById(userId: string): Promise<User> {
+    const user = await this.user.findUnique({ where: { id: userId } });
+
+    if (!user) throw new HttpException(404, "User does not exist");
+    return user;
   }
 }
