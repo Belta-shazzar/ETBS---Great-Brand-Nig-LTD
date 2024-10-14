@@ -36,10 +36,11 @@ export class EventService {
     eventId: string,
     transaction: any
   ): Promise<any> {
+    const event = await this.getEventById(eventId);
     const [eventWithLock] = await transaction.$queryRaw`
       SELECT * 
       FROM "Event" 
-      WHERE id = ${eventId}::uuid
+      WHERE id = ${event.id}::uuid
       FOR UPDATE;
     `;
 

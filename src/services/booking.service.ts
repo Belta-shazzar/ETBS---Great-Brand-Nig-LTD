@@ -83,6 +83,12 @@ export class BookingService {
     cancellationDto: BookingCancellationDto,
     userId: string
   ): Promise<Booking> {
+    const checkBooking = await this.booking.findUnique({
+      where: { id: cancellationDto.bookingId },
+    });
+    if (!checkBooking || checkBooking.status === BookingStatus.CANCELLED)
+      throw new HttpException(404, "Ticket not found");
+
     return await this.prisma.$transaction(async (transaction) => {
       const bookedTicket: Booking = await transaction.booking.update({
         where: { id: cancellationDto.bookingId, userId: userId },

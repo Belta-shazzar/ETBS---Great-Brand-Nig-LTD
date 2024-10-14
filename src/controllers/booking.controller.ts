@@ -14,16 +14,16 @@ export class BookingController {
     try {
       const { eventId } = req.body;
       const { id } = req.user;
-      const bookedTicket: any = await this.bookingService.bookATicket(
+      const response: any = await this.bookingService.bookATicket(
         eventId,
         id
       );
 
-      const message: string = bookedTicket.status
+      const message: string = response.status
         ? "Ticket booked successfully"
         : "You have been added to the wait list as tickets are currently unavailable";
 
-      res.status(200).json({ message, data: bookedTicket });
+      res.status(200).json({ message, response });
     } catch (error) {
       next(error);
     }
@@ -40,7 +40,7 @@ export class BookingController {
       await this.bookingService.cancelBooking(bookingCancellationData, id);
       res
         .status(200)
-        .json({ data: "", message: "Booking cancelled successfully" });
+        .json({ message: "Booking cancelled successfully" });
     } catch (error) {
       next(error);
     }
