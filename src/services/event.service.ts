@@ -2,11 +2,9 @@ import { InitializeEventDto } from "@/dtos/event.dto";
 import { HttpException } from "@/exceptions/http.exception";
 import { EventStatusResponse } from "@/interfaces/event.interface";
 import { Event, EventStatus, PrismaClient, WaitList } from "@prisma/client";
-import { Service } from "typedi";
 import { WaitListService } from "@services/waitList.service";
 import { UpdateEventOption } from "@/enum/event.enum";
 
-@Service()
 export class EventService {
   public prisma = new PrismaClient();
   public event = this.prisma.event;

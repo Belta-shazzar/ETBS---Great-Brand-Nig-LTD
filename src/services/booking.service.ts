@@ -14,9 +14,7 @@ import dayjs from "dayjs";
 import { HttpException } from "@/exceptions/http.exception";
 import { UpdateEventOption } from "@/enum/event.enum";
 import { CancelledBookingService } from "./cancelledBooking.service";
-import { Service } from "typedi";
 
-@Service()
 export class BookingService {
   public prisma = new PrismaClient();
   public booking = this.prisma.booking;

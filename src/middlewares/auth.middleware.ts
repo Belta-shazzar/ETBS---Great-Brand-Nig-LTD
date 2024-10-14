@@ -2,7 +2,7 @@ import { PrismaClient } from "@prisma/client";
 import { NextFunction, Response } from "express";
 import { verify } from "jsonwebtoken";
 import { DataStoredInToken, RequestWithUser } from "@interfaces/auth.interface";
-import { SECRET_KEY } from "@/config";
+import config from "@/config";
 import { HttpException } from "@/exceptions/http.exception";
 
 const getAuthorization = (req) => {
@@ -21,7 +21,7 @@ export const AuthMiddleware = async (
     const Authorization = getAuthorization(req);
 
     if (Authorization) {
-      const { id } = verify(Authorization, SECRET_KEY) as DataStoredInToken;
+      const { id } = verify(Authorization, config.app.jwtSecret) as DataStoredInToken;
       const users = new PrismaClient().user;
       const findUser = await users.findUnique({ where: { id } });
 

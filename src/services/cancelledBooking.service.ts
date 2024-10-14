@@ -1,8 +1,6 @@
 import { BookingCancellationDto } from "@/dtos/booking.dto";
 import { PrismaClient } from "@prisma/client";
-import { Service } from "typedi";
 
-@Service()
 export class CancelledBookingService {
   public cancelledBooking = new PrismaClient().cancelledBooking;
 

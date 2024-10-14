@@ -6,10 +6,11 @@ import helmet from "helmet";
 import morgan from "morgan";
 import hpp from "hpp";
 import { Routes } from "@interfaces/routes.interface";
-import { CREDENTIALS, LOG_FORMAT, NODE_ENV, ORIGIN, PORT } from "@/config";
+import config from "@/config";
 import { logger, stream } from "@/utils/logger";
 import { ErrorMiddleware } from "@/middlewares/error.middleware";
 import { HttpException } from "./exceptions/http.exception";
+import ResponseInterceptor from "./middlewares/transform-response.middleware";
 import rateLimit from "express-rate-limit";
 
 export class App {
@@ -19,10 +20,11 @@ export class App {
 
   constructor(routes: Routes[]) {
     this.app = express();
-    this.env = NODE_ENV || "development";
-    this.port = PORT || 3000;
+    this.env = config.app.node_env || "development";
+    this.port = config.app.port || 3000;
 
     this.initializeMiddlewares();
+    this.initializeResponseTransform();
     this.initializeRoutes(routes);
     this.initializeErrorHandling();
   }
@@ -39,8 +41,10 @@ export class App {
   }
 
   private initializeMiddlewares() {
-    this.app.use(morgan(LOG_FORMAT, { stream }));
-    this.app.use(cors({ origin: ORIGIN, credentials: CREDENTIALS }));
+    this.app.use(morgan(config.logs.format, { stream }));
+    this.app.use(
+      cors({ origin: config.cors.origin, credentials: config.cors.credentials })
+    );
     this.app.use(hpp());
     this.app.use(helmet());
     this.app.use(compression());
@@ -67,6 +71,10 @@ export class App {
     this.app.use((req, res, next) => {
       throw new HttpException(404, "URL not Found");
     });
+  }
+
+  private initializeResponseTransform() {
+    this.app.use(ResponseInterceptor);
   }
 
   private initializeErrorHandling() {

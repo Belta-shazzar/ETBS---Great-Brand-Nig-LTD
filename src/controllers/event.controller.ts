@@ -1,12 +1,11 @@
 import { EventService } from "@/services/event.service";
-import Container from "typedi";
 import { NextFunction, Request, Response } from "express";
 import { InitializeEventDto } from "@/dtos/event.dto";
 import { Event } from "@prisma/client";
 import { EventStatusResponse } from "@/interfaces/event.interface";
 
 export class EventController {
-  public eventService = Container.get(EventService);
+  public eventService = new EventService();
 
   public initializeEvent = async (
     req: Request,
@@ -19,9 +18,7 @@ export class EventController {
         eventData
       );
 
-      res
-        .status(201)
-        .json({ message: "Event initialized", data: initializedEvent });
+      res.status(201).json(initializedEvent);
     } catch (error) {
       next(error);
     }
@@ -38,9 +35,7 @@ export class EventController {
       const eventStatus: EventStatusResponse =
         await this.eventService.getEventStatus(eventId);
 
-      res
-        .status(200)
-        .json({ message: "Event status retrieved", data: eventStatus });
+      res.status(200).json(eventStatus);
     } catch (error) {
       next(error);
     }

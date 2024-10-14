@@ -1,11 +1,10 @@
 import { BookingService } from "@/services/booking.service";
-import Container from "typedi";
 import { Response, NextFunction } from "express";
 import { BookingCancellationDto } from "@/dtos/booking.dto";
 import { RequestWithUser } from "@/interfaces/auth.interface";
 
 export class BookingController {
-  public bookingService = Container.get(BookingService);
+  public bookingService = new BookingService();
 
   public bookATicket = async (
     req: RequestWithUser,

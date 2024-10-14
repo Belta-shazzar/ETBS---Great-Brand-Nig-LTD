@@ -6,16 +6,17 @@
   "license": "ISC",
   "description": "Assessment from Great Brands Nig LTD -- Event Ticket Booking System",
   "scripts": {
-    "build:simple": "tsc",
+    "dev": "cross-env NODE_ENV=development nodemon",
     "build": "tsc && tsc-alias",
-    "start": "cross-env NODE_ENV=production node -r tsconfig-paths/register dist/server.js",
-    "dev": "cross-env NODE_ENV=development nodemon --watch 'src/**/*.ts' --exec 'node -r ts-node/register -r tsconfig-paths/register src/server.ts'",
+    "start": "cross-env NODE_ENV=production node dist/server.js",
+    "start:prod": "npm run build && npm run start",
     "test": "cross-env NODE_ENV=test jest --watchAll --coverage",
     "lint": "eslint --ignore-path .gitignore --ext .ts src/",
     "lint:fix": "npm run lint -- --fix",
     "prisma:init": "prisma init",
+    "prisma:generate": "prisma generate",
     "prisma:migrate": "prisma migrate dev --preview-feature",
-    "prisma:generate": "prisma generate"
+    "clean": "rimraf dist"
   },
   "prisma": {
     "schema": "src/prisma/schema.prisma"
@@ -37,7 +38,6 @@
     "jsonwebtoken": "^9.0.2",
     "morgan": "^1.10.0",
     "reflect-metadata": "^0.2.2",
-    "typedi": "^0.10.0",
     "winston": "^3.14.2",
     "winston-daily-rotate-file": "^5.0.0"
   },
@@ -61,6 +61,7 @@
     "supertest": "^7.0.0",
     "ts-jest": "^29.2.5",
     "ts-node": "^10.9.2",
+    "tsc-alias": "^1.8.10",
     "tsconfig-paths": "^4.2.0",
     "typescript": "^5.6.2"
   }

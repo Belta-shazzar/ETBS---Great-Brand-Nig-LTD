@@ -1,11 +1,11 @@
-import { LOG_DIR } from "@/config";
+import config from "@/config";
 import { existsSync, mkdirSync } from "fs";
 import { join } from "path";
 import winston from "winston";
 import winstonDaily from "winston-daily-rotate-file";
 
 // logs directory
-const logDir: string = join(__dirname, LOG_DIR);
+const logDir: string = join(__dirname, config.logs.directory);
 
 if (!existsSync(logDir)) {
   mkdirSync(logDir);

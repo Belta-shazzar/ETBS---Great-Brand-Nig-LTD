@@ -1,21 +1,20 @@
-import { Service } from "typedi";
 import { LoginDto, SignUpDto } from "@/dtos/auth.dto";
 import { User } from "@prisma/client";
 import { HttpException } from "@/exceptions/http.exception";
 import { compare, hash } from "bcrypt";
 import { UserService } from "@services/user.service";
-import { DataStoredInToken } from "@/interfaces/auth.interface";
-import { SECRET_KEY } from "@/config";
+import { AuthData, DataStoredInToken } from "@/interfaces/auth.interface";
+import config from "@/config";
 import { sign } from "jsonwebtoken";
 
-@Service()
 export class AuthService {
   public userService = new UserService();
 
-  public async signUp(signUpDto: SignUpDto): Promise<User> {
+  public async signUp(signUpDto: SignUpDto): Promise<AuthData> {
     const checkUser: User = await this.userService.getUserByMail(
       signUpDto.email
     );
+
     if (checkUser)
       throw new HttpException(
         409,
@@ -23,15 +22,18 @@ export class AuthService {
       );
 
     const hashedPassword = await hash(signUpDto.password, 10);
-    const createUserData: User = await this.userService.createUser({
+    const user: User = await this.userService.createUser({
       ...signUpDto,
       password: hashedPassword,
     });
 
-    return createUserData;
+    return {
+      user: this.userService.stripUserPassword(user),
+      token: this.createToken(user),
+    };
   }
 
-  public async login(loginDto: LoginDto) {
+  public async login(loginDto: LoginDto): Promise<AuthData> {
     const user: User = await this.userService.getUserByMail(loginDto.email);
     if (!user)
       throw new HttpException(
@@ -45,14 +47,15 @@ export class AuthService {
     );
     if (!isPasswordMatching) throw new HttpException(401, "Incorrect password");
 
-    const token = this.createToken(user);
-
-    return { token, user };
+    return {
+      user: this.userService.stripUserPassword(user),
+      token: this.createToken(user),
+    };
   }
 
   public createToken(user: User): string {
     const dataStoredInToken: DataStoredInToken = { id: user.id };
-    const secretKey: string = SECRET_KEY;
+    const secretKey: string = config.app.jwtSecret;
     const expiresIn: number = 60 * 60;
 
     return sign(dataStoredInToken, secretKey, { expiresIn });

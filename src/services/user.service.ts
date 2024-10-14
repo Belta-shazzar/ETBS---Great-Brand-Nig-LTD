@@ -1,9 +1,7 @@
 import { SignUpDto } from "@/dtos/auth.dto";
 import { HttpException } from "@/exceptions/http.exception";
 import { PrismaClient, User } from "@prisma/client";
-import { Service } from "typedi";
 
-@Service()
 export class UserService {
   public user = new PrismaClient().user;
 
@@ -24,5 +22,11 @@ export class UserService {
 
     if (!user) throw new HttpException(404, "User does not exist");
     return user;
+  }
+  
+  public stripUserPassword(user: User): Partial<User> {
+    const { password, ...stripedUser } = user;
+
+    return stripedUser;
   }
 }

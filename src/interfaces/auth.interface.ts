@@ -8,3 +8,8 @@ export interface DataStoredInToken {
 export interface RequestWithUser extends Request {
   user: User;
 }
+
+export interface AuthData {
+  user: Partial<User>;
+  token: string;
+}
