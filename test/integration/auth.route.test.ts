@@ -9,21 +9,14 @@ let prisma: PrismaClient;
 beforeAll(async () => {
   prisma = new PrismaClient();
   await prisma.$connect();
-
-  //   Clean up database before test
-  await prisma.cancelledBooking.deleteMany();
-  await prisma.booking.deleteMany();
-  await prisma.waitList.deleteMany();
-  await prisma.event.deleteMany();
-  await prisma.user.deleteMany();
 });
 
 afterAll(async () => {
-  //   Clean up database after test
-  await prisma.cancelledBooking.deleteMany();
-  await prisma.booking.deleteMany();
-  await prisma.waitList.deleteMany();
-  await prisma.event.deleteMany();
+  // //   Clean up database after test
+  // await prisma.cancelledBooking.deleteMany();
+  // await prisma.waitList.deleteMany();
+  // await prisma.booking.deleteMany();
+  // await prisma.event.deleteMany();
   await prisma.user.deleteMany();
 
   await prisma.$disconnect();

@@ -10,18 +10,10 @@ beforeAll(async () => {
   await prisma.$connect();
 });
 
-beforeEach(async () => {
-  await prisma.cancelledBooking.deleteMany();
-  await prisma.booking.deleteMany();
-  await prisma.waitList.deleteMany();
-  await prisma.event.deleteMany();
-  await prisma.user.deleteMany();
-});
-
 afterAll(async () => {
   await prisma.cancelledBooking.deleteMany();
-  await prisma.booking.deleteMany();
   await prisma.waitList.deleteMany();
+  await prisma.booking.deleteMany();
   await prisma.event.deleteMany();
   await prisma.user.deleteMany();
   

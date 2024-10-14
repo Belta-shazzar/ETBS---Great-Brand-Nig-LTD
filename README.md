@@ -4,10 +4,6 @@ This project was built using a class-based architecture to promote a more organi
 
 Prisma was chosen as the ORM because of its intuitive, type-safe query system and strong support for TypeScript. It simplifies database interactions by providing an abstraction layer that reduces the complexity of raw SQL queries while maintaining performance. Prisma's migration system ensures smooth schema evolution, making it easier to maintain and update the database structure as the project grows. Its integration with TypeScript enhances type safety, preventing runtime errors and making the code more robust.
 
-## Dockerized Development and Test Environments
-
-This application has been fully dockerized to ease development and testing processes. This allows isolation of the Postgres database, ensuring consistency across different environments.
-
 
 
 ## Local Development Setup
@@ -15,18 +11,19 @@ This application has been fully dockerized to ease development and testing proce
 Docker and Git are Prerequisites.
 
 - Clone the repository
-- Create a `.env` file and fill in the required fields. See `.env.example` for blueprint. (For the database url, get it from the docker-compose.dev.yml)
-- Run `./start.sh -e dev -c up-build` to build and start the dev container
-- Run `./start.sh -e dev -c exec -s server -r "npm run prisma:migrate" ` to sync the database with the prisma defines models
+- Create a `.env` file and fill in the required fields. See `.env.example` for blueprint.
+- Run `yarn install` to download dependencies
+- Run `docker compose up --build` to start up the database container
+- Run `yarn prisma:migrate` to sync the prisma models to the database
+- Run `yarn dev` to run the application in development mode 
 - Connect to the database with your preferred database client
 - Test endpoints on your preferred API testing tool
 
-## Test set up
-- Clone the repository
-- Run `./start.sh -e test -c up-build` to build and start/run the test container
-
-
-> **Note:** For additional Docker-related commands, please refer to the `start-script-README.md` file.
+## Test Environment Setup
+- Complete [Local Development Setup](#local-development-setup)
+- Copy all values except *DATABASE_URL* from .env file to .env.test
+- Run `yarn prisma:test:migrate` to sync the prisma models to the test database
+- Run `yarn test` to run test
 
 ## Entity Relational Diagram
 

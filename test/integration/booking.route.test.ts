@@ -5,26 +5,20 @@ import { LoginDto, SignUpDto } from "../../src/dtos/auth.dto";
 import { Booking, Event, PrismaClient, User } from "@prisma/client";
 import { AuthRoute } from "../../src/routes/auth.route";
 import { EventRoute } from "../../src/routes/event.route";
+import { faker } from "@faker-js/faker";
 
 let prisma: PrismaClient;
 
 beforeAll(async () => {
   prisma = new PrismaClient();
   await prisma.$connect();
-
-  //   Clear database before test
-  await prisma.cancelledBooking.deleteMany();
-  await prisma.booking.deleteMany();
-  await prisma.waitList.deleteMany();
-  await prisma.event.deleteMany();
-  await prisma.user.deleteMany();
 });
 
 afterAll(async () => {
   //   Clear database before test
   await prisma.cancelledBooking.deleteMany();
-  await prisma.booking.deleteMany();
   await prisma.waitList.deleteMany();
+  await prisma.booking.deleteMany();
   await prisma.event.deleteMany();
   await prisma.user.deleteMany();
 
@@ -44,26 +38,18 @@ describe("Booking integration test", () => {
   describe("[POST] /bookings/book", () => {
     it("should return a 404 if event is not found", async () => {
       const signUpDto: SignUpDto = {
-        name: "Agatha",
+        name: `${faker.person.firstName()} ${faker.person.lastName()}`,
         email: "agatha@test.com",
         password: "password",
-        phoneNumber: "08000000000",
-      };
-
-      await request(app.getServer())
-        .post(`${authRoute.path}/sign-up`)
-        .send(signUpDto);
-
-      const loginDto: LoginDto = {
-        email: "agatha@test.com",
-        password: "password",
+        phoneNumber: faker.phone.number(),
       };
 
       const userResponse = await request(app.getServer())
-        .post(`${authRoute.path}/login`)
-        .send(loginDto);
-      user = userResponse.body.data;
-      token = userResponse.body.token;
+        .post(`${authRoute.path}/sign-up`)
+        .send(signUpDto);
+
+      user = userResponse.body.data.user;
+      token = userResponse.body.data.token;
 
       return request(app.getServer())
         .post(`${bookingRoute.path}/book`)
@@ -83,7 +69,7 @@ describe("Booking integration test", () => {
         .post(`${eventRoute.path}/initialize`)
         .send(eventData);
       event = eventResponse.body.data;
-      
+
       const bookingResponse = request(app.getServer())
         .post(`${bookingRoute.path}/book`)
         .set("Authorization", `Bearer ${token}`)

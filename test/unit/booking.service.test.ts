@@ -6,6 +6,7 @@ import { BookingCancellationDto } from "../../src/dtos/booking.dto";
 import { InitializeEventDto } from "../../src/dtos/event.dto";
 import { SignUpDto } from "../../src/dtos/auth.dto";
 import { EventStatusResponse } from "../../src/interfaces/event.interface";
+import { faker } from "@faker-js/faker";
 
 let prisma: PrismaClient;
 
@@ -14,21 +15,13 @@ beforeAll(async () => {
   await prisma.$connect();
 });
 
-beforeEach(async () => {
-  await prisma.cancelledBooking.deleteMany();
-  await prisma.booking.deleteMany();
-  await prisma.waitList.deleteMany();
-  await prisma.event.deleteMany();
-  await prisma.user.deleteMany();
-});
-
 afterAll(async () => {
   await prisma.cancelledBooking.deleteMany();
-  await prisma.booking.deleteMany();
   await prisma.waitList.deleteMany();
+  await prisma.booking.deleteMany();
   await prisma.event.deleteMany();
   await prisma.user.deleteMany();
-  
+
   await prisma.$disconnect();
 });
 
@@ -49,10 +42,10 @@ describe("Booking Service", () => {
       const event = await eventService.initializeEvent(eventDto);
 
       const signUpDto: SignUpDto = {
-        name: "Agatha",
-        email: "agatha@test.com",
+        name: `${faker.person.firstName()} ${faker.person.lastName()}`,
+        email: faker.internet.email(),
         password: "password",
-        phoneNumber: "08000000000",
+        phoneNumber: faker.phone.number(),
       };
       const user = await userService.createUser(signUpDto);
 
@@ -81,10 +74,10 @@ describe("Booking Service", () => {
       const event = await eventService.initializeEvent(eventDto);
 
       const signUpDto: SignUpDto = {
-        name: "Agatha",
-        email: "agatha@test.com",
+        name: `${faker.person.firstName()} ${faker.person.lastName()}`,
+        email: faker.internet.email(),
         password: "password",
-        phoneNumber: "08000000000",
+        phoneNumber: faker.phone.number(),
       };
       const user = await userService.createUser(signUpDto);
 
@@ -121,17 +114,17 @@ describe("Booking Service", () => {
       const event = await eventService.initializeEvent(eventDto);
 
       const firstUser: SignUpDto = {
-        name: "Agatha",
-        email: "agatha@test.com",
+        name: `${faker.person.firstName()} ${faker.person.lastName()}`,
+        email: faker.internet.email(),
         password: "password",
-        phoneNumber: "08000000000",
+        phoneNumber: faker.phone.number(),
       };
 
       const secondUser: SignUpDto = {
-        name: "Simi",
-        email: "simi@test.com",
+        name: `${faker.person.firstName()} ${faker.person.lastName()}`,
+        email: faker.internet.email(),
         password: "password",
-        phoneNumber: "07000000000",
+        phoneNumber: faker.phone.number(),
       };
       const user1 = await userService.createUser(firstUser);
       const user2 = await userService.createUser(secondUser);
@@ -178,10 +171,10 @@ describe("Booking Service", () => {
       const event = await eventService.initializeEvent(eventDto);
 
       const signUpDto: SignUpDto = {
-        name: "Agatha",
-        email: "agatha@test.com",
+        name: `${faker.person.firstName()} ${faker.person.lastName()}`,
+        email: faker.internet.email(),
         password: "password",
-        phoneNumber: "08000000000",
+        phoneNumber: faker.phone.number(),
       };
       const user = await userService.createUser(signUpDto);
 
