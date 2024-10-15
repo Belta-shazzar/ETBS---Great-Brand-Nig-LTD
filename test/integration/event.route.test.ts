@@ -43,8 +43,8 @@ describe("Event integration test", () => {
         name: "Father and Son",
         totalTicket: 3, //Total ticket must be greater than 0
         venue: "Ikate, Surulere, Lagos",
-        startAt: new Date("2024-10-15"),
-        endAt: new Date("2024-10-18"),
+        startAt: new Date("2026-10-15"),
+        endAt: new Date("2026-10-18"),
       };
 
       const response = request(app.getServer())

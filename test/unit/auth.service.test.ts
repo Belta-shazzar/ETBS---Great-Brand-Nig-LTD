@@ -18,7 +18,7 @@ afterAll(async () => {
 });
 
 describe("Auth Service", () => {
-  it("should encrypt password", async () => {
+  it("should sign user up", async () => {
     const authService = new AuthService();
 
     const signUpDto: SignUpDto = {
@@ -28,7 +28,8 @@ describe("Auth Service", () => {
       phoneNumber: faker.phone.number(),
     };
     const response: AuthData = await authService.signUp(signUpDto);
+
+    expect(response).toHaveProperty("token");
     expect(response.user).toHaveProperty("id");
-    expect(response.user.password).not.toBe(signUpDto);
   });
 });
