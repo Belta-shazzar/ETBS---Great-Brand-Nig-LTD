@@ -1,7 +1,10 @@
-import { PrismaClient, WaitList } from "@prisma/client";
+import prisma from "@/config/prisma";
+import { WaitList } from "@prisma/client";
+import { Service } from "typedi";
 
+@Service()
 export class WaitListService {
-  public waitList = new PrismaClient().waitList;
+  public waitList = prisma.waitList;
 
   public async addToWaitList(
     eventId: string,

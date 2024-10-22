@@ -8,7 +8,7 @@ import { Router } from "express";
 export class AuthRoute implements Routes {
   public path: string = "/auth";
   public router: Router = Router();
-  public authController = new AuthController();
+  private authController = new AuthController();
 
   constructor() {
     this.initializeRoutes();

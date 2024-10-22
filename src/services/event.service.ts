@@ -1,14 +1,17 @@
 import { InitializeEventDto } from "@/dtos/event.dto";
 import { HttpException } from "@/exceptions/http.exception";
 import { EventStatusResponse } from "@/interfaces/event.interface";
-import { Event, EventStatus, PrismaClient, WaitList } from "@prisma/client";
+import { Event, EventStatus, WaitList } from "@prisma/client";
 import { WaitListService } from "@services/waitList.service";
 import { UpdateEventOption } from "@/enum/event.enum";
+import { Service } from "typedi";
+import prisma from "@/config/prisma";
 
+@Service()
 export class EventService {
-  public prisma = new PrismaClient();
-  public event = this.prisma.event;
-  public waitListService = new WaitListService();
+  private event = prisma.event;
+
+  constructor(private waitListService: WaitListService) {}
 
   public async initializeEvent(eventDto: InitializeEventDto): Promise<Event> {
     const event: Event = await this.event.create({

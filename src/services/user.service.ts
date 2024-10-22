@@ -1,9 +1,12 @@
+import prisma from "@/config/prisma";
 import { SignUpDto } from "@/dtos/auth.dto";
 import { HttpException } from "@/exceptions/http.exception";
-import { PrismaClient, User } from "@prisma/client";
+import { User } from "@prisma/client";
+import { Service } from "typedi";
 
+@Service()
 export class UserService {
-  public user = new PrismaClient().user;
+  public user = prisma.user;
 
   public async createUser(signUpDto: SignUpDto): Promise<User> {
     const user = await this.user.create({

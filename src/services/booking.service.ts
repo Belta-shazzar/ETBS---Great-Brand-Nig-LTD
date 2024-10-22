@@ -2,7 +2,6 @@ import { BookingCancellationDto } from "@/dtos/booking.dto";
 import {
   Booking,
   BookingStatus,
-  PrismaClient,
   Event,
   EventStatus,
   User,
@@ -14,15 +13,19 @@ import dayjs from "dayjs";
 import { HttpException } from "@/exceptions/http.exception";
 import { UpdateEventOption } from "@/enum/event.enum";
 import { CancelledBookingService } from "./cancelledBooking.service";
+import prisma from "@/config/prisma";
+import { Service } from "typedi";
 
+@Service()
 export class BookingService {
-  public prisma = new PrismaClient();
-  public booking = this.prisma.booking;
+  public booking = prisma.booking;
 
-  public eventService = new EventService();
-  public userService = new UserService();
-  public waitListService = new WaitListService();
-  public cancelBookingService = new CancelledBookingService();
+  constructor(
+    private eventService: EventService,
+    private userService: UserService,
+    private waitListService: WaitListService,
+    private cancelBookingService: CancelledBookingService
+  ) {}
 
   public async createBooking(
     eventId: string,
@@ -42,7 +45,7 @@ export class BookingService {
     const user: User = await this.userService.getUserById(userId);
 
     // Begin transaction process
-    return await this.prisma.$transaction(async (transaction) => {
+    return await prisma.$transaction(async (transaction) => {
       let bookingResponse: any;
       const event: Event = await this.eventService.getEventInLockedMode(
         eventId,
@@ -89,7 +92,7 @@ export class BookingService {
     if (!checkBooking || checkBooking.status === BookingStatus.CANCELLED)
       throw new HttpException(404, "Ticket not found");
 
-    return await this.prisma.$transaction(async (transaction) => {
+    return await prisma.$transaction(async (transaction) => {
       const bookedTicket: Booking = await transaction.booking.update({
         where: { id: cancellationDto.bookingId, userId: userId },
         data: { status: BookingStatus.CANCELLED },

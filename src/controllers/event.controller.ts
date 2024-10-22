@@ -3,9 +3,10 @@ import { NextFunction, Request, Response } from "express";
 import { InitializeEventDto } from "@/dtos/event.dto";
 import { Event } from "@prisma/client";
 import { EventStatusResponse } from "@/interfaces/event.interface";
+import Container from "typedi";
 
 export class EventController {
-  public eventService = new EventService();
+  public eventService = Container.get(EventService);
 
   public initializeEvent = async (
     req: Request,

@@ -1,4 +1,4 @@
-import { PrismaClient } from "@prisma/client";
+import prisma from "@/config/prisma";
 import { NextFunction, Response } from "express";
 import { verify } from "jsonwebtoken";
 import { DataStoredInToken, RequestWithUser } from "@interfaces/auth.interface";
@@ -22,7 +22,7 @@ export const AuthMiddleware = async (
 
     if (Authorization) {
       const { id } = verify(Authorization, config.app.jwtSecret) as DataStoredInToken;
-      const users = new PrismaClient().user;
+      const users = prisma.user;
       const findUser = await users.findUnique({ where: { id } });
 
       if (findUser) {

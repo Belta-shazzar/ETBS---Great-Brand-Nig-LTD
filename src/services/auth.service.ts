@@ -6,9 +6,11 @@ import { UserService } from "@services/user.service";
 import { AuthData, DataStoredInToken } from "@/interfaces/auth.interface";
 import config from "@/config";
 import { sign } from "jsonwebtoken";
+import { Service } from "typedi";
 
+@Service()
 export class AuthService {
-  public userService = new UserService();
+  constructor(private userService: UserService) {}
 
   public async signUp(signUpDto: SignUpDto): Promise<AuthData> {
     const checkUser: User = await this.userService.getUserByMail(

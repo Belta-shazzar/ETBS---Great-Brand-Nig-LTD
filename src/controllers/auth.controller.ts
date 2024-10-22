@@ -2,9 +2,10 @@ import { AuthService } from "@/services/auth.service";
 import { Request, Response, NextFunction } from "express";
 import { LoginDto, SignUpDto } from "@/dtos/auth.dto";
 import { RequestWithUser } from "@/interfaces/auth.interface";
+import Container from "typedi";
 
 export class AuthController {
-  public authService = new AuthService();
+  public authService = Container.get(AuthService);
 
   public signUp = async (req: Request, res: Response, next: NextFunction) => {
     try {
@@ -22,9 +23,7 @@ export class AuthController {
       const userData: LoginDto = req.body;
       const user = await this.authService.login(userData);
 
-      res
-        .status(200)
-        .json(user);
+      res.status(200).json(user);
     } catch (error) {
       next(error);
     }

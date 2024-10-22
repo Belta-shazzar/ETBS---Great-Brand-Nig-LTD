@@ -1,4 +1,3 @@
-import "reflect-metadata";
 import { App } from "@/app";
 import { validateEnv } from "@/utils/validate-env";
 import { AuthRoute } from "@/routes/auth.route";
