@@ -4,19 +4,22 @@ import { InitializeEventDto } from "@/dtos/event.dto";
 import { Event } from "@prisma/client";
 import { EventStatusResponse } from "@/interfaces/event.interface";
 import Container from "typedi";
+import { RequestWithUser } from "@/interfaces/auth.interface";
 
 export class EventController {
   public eventService = Container.get(EventService);
 
   public initializeEvent = async (
-    req: Request,
+    req: RequestWithUser,
     res: Response,
     next: NextFunction
   ) => {
     try {
       const eventData: InitializeEventDto = req.body;
+      const { id } = req.user;
       const initializedEvent: Event = await this.eventService.initializeEvent(
-        eventData
+        eventData,
+        id
       );
 
       res.status(201).json(initializedEvent);

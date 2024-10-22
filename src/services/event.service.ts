@@ -13,10 +13,11 @@ export class EventService {
 
   constructor(private waitListService: WaitListService) {}
 
-  public async initializeEvent(eventDto: InitializeEventDto): Promise<Event> {
+  public async initializeEvent(eventDto: InitializeEventDto, userId: string): Promise<Event> {
     const event: Event = await this.event.create({
       data: {
         ...eventDto,
+        managerId: userId,
         availableTicket: eventDto.totalTicket,
         status: EventStatus.ACTIVE,
       },

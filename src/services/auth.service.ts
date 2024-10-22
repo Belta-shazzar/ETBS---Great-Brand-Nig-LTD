@@ -55,10 +55,10 @@ export class AuthService {
     };
   }
 
-  public createToken(user: User): string {
+  private createToken(user: User): string {
     const dataStoredInToken: DataStoredInToken = { id: user.id };
     const secretKey: string = config.app.jwtSecret;
-    const expiresIn: number = 60 * 60;
+    const expiresIn: number = 60 * 3600;
 
     return sign(dataStoredInToken, secretKey, { expiresIn });
   }
