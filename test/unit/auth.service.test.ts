@@ -166,7 +166,7 @@ describe("AuthService unit test", () => {
     });
   });
 
-  describe("createToken", () => {
+  describe("Create token case", () => {
     it("should create a valid JWT token", () => {
       (sign as jest.Mock).mockResolvedValue(mockToken);
 

@@ -6,7 +6,6 @@ import {
   EventStatus,
   User,
 } from "@prisma/client";
-import { UserService } from "@services/user.service";
 import { WaitListService } from "@services/waitList.service";
 import { EventService } from "@services/event.service";
 import dayjs from "dayjs";
@@ -18,11 +17,10 @@ import { Service } from "typedi";
 
 @Service()
 export class BookingService {
-  public booking = prisma.booking;
+  private booking = prisma.booking;
 
   constructor(
     private eventService: EventService,
-    private userService: UserService,
     private waitListService: WaitListService,
     private cancelBookingService: CancelledBookingService
   ) {}
@@ -41,9 +39,7 @@ export class BookingService {
     });
   }
 
-  public async bookATicket(eventId: string, userId: string): Promise<any> {
-    const user: User = await this.userService.getUserById(userId);
-
+  public async bookATicket(eventId: string, user: User): Promise<any> {
     // Begin transaction process
     return await prisma.$transaction(async (transaction) => {
       let bookingResponse: any;
@@ -84,7 +80,7 @@ export class BookingService {
 
   public async cancelBooking(
     cancellationDto: BookingCancellationDto,
-    userId: string
+    user: User
   ): Promise<Booking> {
     const checkBooking = await this.booking.findUnique({
       where: { id: cancellationDto.bookingId },
@@ -94,7 +90,7 @@ export class BookingService {
 
     return await prisma.$transaction(async (transaction) => {
       const bookedTicket: Booking = await transaction.booking.update({
-        where: { id: cancellationDto.bookingId, userId: userId },
+        where: { id: cancellationDto.bookingId, userId: user.id },
         data: { status: BookingStatus.CANCELLED },
       });
 
@@ -104,8 +100,9 @@ export class BookingService {
         transaction
       );
 
-      const checkWaitList =
-        await this.waitListService.getOldestUserOnEventWaitList(eventId);
+      const checkWaitList = await this.waitListService.getOldestWaitListEntry(
+        eventId
+      );
 
       if (checkWaitList) {
         await this.createBooking(eventId, checkWaitList.userId, transaction);

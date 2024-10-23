@@ -7,7 +7,7 @@ import Container from "typedi";
 import { RequestWithUser } from "@/interfaces/auth.interface";
 
 export class EventController {
-  public eventService = Container.get(EventService);
+  private eventService = Container.get(EventService);
 
   public initializeEvent = async (
     req: RequestWithUser,

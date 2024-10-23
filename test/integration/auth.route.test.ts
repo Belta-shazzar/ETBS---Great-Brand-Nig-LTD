@@ -2,103 +2,161 @@ import request from "supertest";
 import { App } from "../../src/app";
 import { AuthRoute } from "../../src/routes/auth.route";
 import { LoginDto, SignUpDto } from "../../src/dtos/auth.dto";
-import { PrismaClient } from "@prisma/client";
-
-let prisma: PrismaClient;
-
-beforeAll(async () => {
-  prisma = new PrismaClient();
-  await prisma.$connect();
-});
-
-afterAll(async () => {
-  // //   Clean up database after test
-  // await prisma.cancelledBooking.deleteMany();
-  // await prisma.waitList.deleteMany();
-  // await prisma.booking.deleteMany();
-  // await prisma.event.deleteMany();
-  await prisma.user.deleteMany();
-
-  await prisma.$disconnect();
-});
+import prisma from "../../src/config/prisma";
+import { faker } from "@faker-js/faker";
 
 describe("Auth integration test", () => {
+  afterAll(async () => {
+    // Clean up database after test
+    await prisma.user.deleteMany();
+    await prisma.$disconnect();
+  });
+
   const authRoute: AuthRoute = new AuthRoute();
   const app: App = new App([authRoute]);
+
   describe("[POST] /auth/sign-up", () => {
     it("should return a 400 if invalid data is sent", async () => {
-      const signUpDto: Partial<SignUpDto> = {
-        name: "Agatha",
-        email: "agatha@test.com",
-        phoneNumber: "08000000000",
+      const invalidSignUpDto: Partial<SignUpDto> = {
+        name: `${faker.person.firstName()} ${faker.person.lastName()}`,
+        email: "user1@testmail.com",
+        phoneNumber: faker.phone.number(),
       };
 
-      return request(app.getServer())
+      const response = await request(app.getServer())
         .post(`${authRoute.path}/sign-up`)
-        .send(signUpDto)
-        .expect(400);
+        .send(invalidSignUpDto);
+
+      expect(response.status).toBe(400);
     });
-    it("should return a 201 if email already exist", async () => {
+    it("should return sign up a user and return 201 ", async () => {
       const signUpDto: SignUpDto = {
-        name: "Agatha",
-        email: "agatha@test.com",
+        name: `${faker.person.firstName()} ${faker.person.lastName()}`,
+        email: "user2@testmail.com",
+        phoneNumber: faker.phone.number(),
         password: "password",
-        phoneNumber: "08000000000",
       };
 
-      return request(app.getServer())
+      const response = await request(app.getServer())
         .post(`${authRoute.path}/sign-up`)
-        .send(signUpDto)
-        .expect(201);
+        .send(signUpDto);
+
+      expect(response.status).toBe(201);
+      expect(response.body.data).toHaveProperty("token");
     });
     it("should return a 409 if email already exist", async () => {
+      const email = "user3@testmail.com";
+      // Save a user to ensure the email exists in the database before the actual test
+      await request(app.getServer())
+        .post(`${authRoute.path}/sign-up`)
+        .send({
+          name: `${faker.person.firstName()} ${faker.person.lastName()}`,
+          email,
+          phoneNumber: faker.phone.number(),
+          password: "password",
+        });
+
       const signUpDto: SignUpDto = {
-        name: "Agatha",
-        email: "agatha@test.com",
+        name: `${faker.person.firstName()} ${faker.person.lastName()}`,
+        email,
+        phoneNumber: faker.phone.number(),
         password: "password",
-        phoneNumber: "08000000000",
       };
 
-      return request(app.getServer())
+      const response = await request(app.getServer())
         .post(`${authRoute.path}/sign-up`)
-        .send(signUpDto)
-        .expect(409);
+        .send(signUpDto);
+
+      expect(response.status).toBe(409);
     });
   });
   describe("[POST] /auth/login", () => {
-    it("should return a 404 if email is not found", async () => {
+    it("should return a 200", async () => {
+      const email = "user4@testmail.com";
+      // Save a user to ensure the email exists in the database before the actual test
+      await request(app.getServer())
+        .post(`${authRoute.path}/sign-up`)
+        .send({
+          name: `${faker.person.firstName()} ${faker.person.lastName()}`,
+          email,
+          phoneNumber: faker.phone.number(),
+          password: "password",
+        });
+
       const loginDto: LoginDto = {
-        email: "sandra@test.com",
+        email,
         password: "password",
       };
 
-      return request(app.getServer())
+      const response = await request(app.getServer())
         .post(`${authRoute.path}/login`)
-        .send(loginDto)
-        .expect(404);
+        .send(loginDto);
+
+      expect(response.status).toBe(200);
+      expect(response.body.data).toHaveProperty("token");
+    });
+
+    it("should return a 404 if email is not found", async () => {
+      const invalidMailLoginDto: LoginDto = {
+        email: faker.internet.email(),
+        password: "password",
+      };
+
+      const response = await request(app.getServer())
+        .post(`${authRoute.path}/login`)
+        .send(invalidMailLoginDto);
+
+      expect(response.status).toBe(404);
     });
     it("should return a 401 if password is incorrect", async () => {
-      const loginDto: LoginDto = {
-        email: "agatha@test.com",
-        password: "passworddd",
+      const email = "user5@testmail.com";
+      // Save a user to ensure the email exists in the database before the actual test
+      await request(app.getServer())
+        .post(`${authRoute.path}/sign-up`)
+        .send({
+          name: `${faker.person.firstName()} ${faker.person.lastName()}`,
+          email,
+          phoneNumber: faker.phone.number(),
+          password: "password",
+        });
+
+      const invalidPasswordLoginDto: LoginDto = {
+        email,
+        password: "incorrect-password",
       };
 
-      return request(app.getServer())
+      const response = await request(app.getServer())
         .post(`${authRoute.path}/login`)
-        .send(loginDto)
-        .expect(401);
+        .send(invalidPasswordLoginDto);
+
+      expect(response.status).toBe(401);
+    });
+  });
+
+  describe("[GET] /auth/authenticated", () => {
+    it("should return a 200", async () => {
+      const signupResponse = await request(app.getServer())
+        .post(`${authRoute.path}/sign-up`)
+        .send({
+          name: `${faker.person.firstName()} ${faker.person.lastName()}`,
+          email: "user6@testmail.com",
+          phoneNumber: faker.phone.number(),
+          password: "password",
+        });
+
+      const response = await request(app.getServer())
+        .get(`${authRoute.path}/authenticated`)
+        .set("Authorization", `Bearer ${signupResponse.body.data.token}`);
+
+      expect(response.status).toBe(200);
     });
 
-    it("should return a 200", async () => {
-      const loginDto: LoginDto = {
-        email: "agatha@test.com",
-        password: "password",
-      };
+    it("should return a 401 if token is invalid", async () => {
+      const response = await request(app.getServer())
+        .get(`${authRoute.path}/authenticated`)
+        .set("Authorization", `Bearer invalid-token`);
 
-      return await request(app.getServer())
-        .post(`${authRoute.path}/login`)
-        .send(loginDto)
-        .expect(200);
+      expect(response.status).toBe(401);
     });
   });
 });

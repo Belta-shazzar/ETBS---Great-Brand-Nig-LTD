@@ -13,11 +13,14 @@ export class EventService {
 
   constructor(private waitListService: WaitListService) {}
 
-  public async initializeEvent(eventDto: InitializeEventDto, userId: string): Promise<Event> {
+  public async initializeEvent(
+    eventDto: InitializeEventDto,
+    userId: string
+  ): Promise<Event> {
     const event: Event = await this.event.create({
       data: {
         ...eventDto,
-        managerId: userId,
+        userId: userId,
         availableTicket: eventDto.totalTicket,
         status: EventStatus.ACTIVE,
       },
@@ -48,7 +51,6 @@ export class EventService {
       FOR UPDATE;
     `;
 
-    if (!eventWithLock) throw new HttpException(404, "Event does not exist");
     return eventWithLock;
   }
 

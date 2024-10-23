@@ -5,7 +5,7 @@ import { RequestWithUser } from "@/interfaces/auth.interface";
 import Container from "typedi";
 
 export class AuthController {
-  public authService = Container.get(AuthService);
+  private authService = Container.get(AuthService);
 
   public signUp = async (req: Request, res: Response, next: NextFunction) => {
     try {

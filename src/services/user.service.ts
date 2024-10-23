@@ -6,7 +6,7 @@ import { Service } from "typedi";
 
 @Service()
 export class UserService {
-  public user = prisma.user;
+  private user = prisma.user;
 
   public async createUser(signUpDto: SignUpDto): Promise<User> {
     const user = await this.user.create({

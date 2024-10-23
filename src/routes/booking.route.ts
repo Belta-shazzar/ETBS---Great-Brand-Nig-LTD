@@ -8,7 +8,7 @@ import { Router } from "express";
 export class BookingRoute implements Routes {
   public path: string = "/bookings";
   public router: Router = Router();
-  public bookingController = new BookingController();
+  private bookingController = new BookingController();
 
   constructor() {
     this.initializeRoutes();

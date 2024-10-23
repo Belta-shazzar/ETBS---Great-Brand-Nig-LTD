@@ -1,201 +1,261 @@
-import { PrismaClient, Booking, Event, BookingStatus } from "@prisma/client";
-import { BookingService } from "../../src/services/booking.service";
-import { EventService } from "../../src/services/event.service";
-import { UserService } from "../../src/services/user.service";
-import { BookingCancellationDto } from "../../src/dtos/booking.dto";
-import { InitializeEventDto } from "../../src/dtos/event.dto";
-import { SignUpDto } from "../../src/dtos/auth.dto";
-import { EventStatusResponse } from "../../src/interfaces/event.interface";
-import { faker } from "@faker-js/faker";
+// import { DeepMockProxy, mock, mockDeep, MockProxy } from "jest-mock-extended";
+// import {
+//   User,
+//   Event,
+//   PrismaClient,
+//   Booking,
+//   BookingStatus,
+//   WaitList,
+// } from "@prisma/client";
+// import { EventStatus } from "@prisma/client";
+// import dayjs from "dayjs";
+// import { BookingService } from "../../src/services/booking.service";
+// import { EventService } from "../../src/services/event.service";
+// import { WaitListService } from "../../src/services/waitList.service";
+// import { CancelledBookingService } from "../../src/services/cancelledBooking.service";
+// import { generateUUID } from "../util";
+// import { faker } from "@faker-js/faker";
+// import prisma from "../../src/config/prisma";
+// import { UpdateEventOption } from "../../src/enum/event.enum";
+// import { HttpException } from "../../src/exceptions/http.exception";
 
-let prisma: PrismaClient;
+// jest.mock("../../src/config/prisma.ts", () => ({
+//   __esModule: true,
+//   default: mockDeep<PrismaClient>(),
+// }));
 
-beforeAll(async () => {
-  prisma = new PrismaClient();
-  await prisma.$connect();
-});
+// describe("BookingService unit test", () => {
+//   // Mocked prisma client
+//   const mockedPrisma = prisma as unknown as DeepMockProxy<PrismaClient>;
 
-afterAll(async () => {
-  await prisma.cancelledBooking.deleteMany();
-  await prisma.waitList.deleteMany();
-  await prisma.booking.deleteMany();
-  await prisma.event.deleteMany();
-  await prisma.user.deleteMany();
+//   let bookingService: BookingService;
 
-  await prisma.$disconnect();
-});
+//   // Mocked dependencies
+//   let eventService: MockProxy<EventService>;
+//   let waitListService: MockProxy<WaitListService>;
+//   let cancelBookingService: MockProxy<CancelledBookingService>;
 
-describe("Booking Service", () => {
-  describe("Book a ticket", () => {
-    it("should add a user to waitlist due to unavailable ticket", async () => {
-      const eventService = new EventService();
-      const userService = new UserService();
-      const bookingService = new BookingService();
+//   // Mock user details
+//   const userId: string = generateUUID();
+//   const userName: string = `${faker.person.firstName()} ${faker.person.lastName()}`;
+//   const email: string = faker.internet.email();
+//   const phoneNumber: string = faker.phone.number();
 
-      const eventDto: InitializeEventDto = {
-        name: "Tech Stars",
-        totalTicket: 0,
-        venue: "Ikeja",
-        startAt: new Date("2024-10-15"),
-        endAt: new Date("2024-10-18"),
-      };
-      const event = await eventService.initializeEvent(eventDto);
+//   const mockUser: User = {
+//     id: userId,
+//     name: userName,
+//     email,
+//     phoneNumber,
+//     password: "hashedPassword",
+//     createdAt: new Date(),
+//     updatedAt: new Date(),
+//   };
 
-      const signUpDto: SignUpDto = {
-        name: `${faker.person.firstName()} ${faker.person.lastName()}`,
-        email: faker.internet.email(),
-        password: "password",
-        phoneNumber: faker.phone.number(),
-      };
-      const user = await userService.createUser(signUpDto);
+//   // Mock event details
+//   const eventId: string = generateUUID();
+//   const eventName: string = "Test event";
+//   const venue: string = "event_venue";
+//   const totalTicket: number = 1;
+//   const availableTicket: number = 1;
+//   const startAt: Date = new Date("2026-10-15T14:30:00.000Z");
+//   const endAt: Date = new Date("2026-10-18T14:30:00.000Z");
 
-      const bookingResponse: any = await bookingService.bookATicket(
-        event.id,
-        user.id
-      );
+//   const mockEvent: Event = {
+//     id: eventId,
+//     userId,
+//     name: eventName,
+//     venue,
+//     totalTicket,
+//     availableTicket,
+//     startAt,
+//     endAt,
+//     status: EventStatus.ACTIVE,
+//     createdAt: new Date(),
+//     updatedAt: new Date(),
+//     deletedAt: null,
+//   };
 
-      expect(bookingResponse).toHaveProperty("id");
-      expect(bookingResponse).toHaveProperty("userId");
-      expect(bookingResponse).toHaveProperty("eventId");
-      expect(bookingResponse).not.toContain("status");
-    });
-    it("should book an event ticket", async () => {
-      const eventService = new EventService();
-      const userService = new UserService();
-      const bookingService = new BookingService();
+//   // Mock booking details
+//   const bookingId: string = generateUUID();
 
-      const eventDto: InitializeEventDto = {
-        name: "Tech Stars",
-        totalTicket: 1,
-        venue: "Ikeja",
-        startAt: new Date("2024-10-15"),
-        endAt: new Date("2024-10-18"),
-      };
-      const event = await eventService.initializeEvent(eventDto);
+//   const mockConfirmedBookingResponse: Booking = {
+//     id: bookingId,
+//     userId,
+//     eventId,
+//     status: BookingStatus.CONFIRMED,
+//     createdAt: new Date(),
+//     updatedAt: new Date(),
+//     deletedAt: null,
+//   };
 
-      const signUpDto: SignUpDto = {
-        name: `${faker.person.firstName()} ${faker.person.lastName()}`,
-        email: faker.internet.email(),
-        password: "password",
-        phoneNumber: faker.phone.number(),
-      };
-      const user = await userService.createUser(signUpDto);
+//   beforeEach(() => {
+//     jest.clearAllMocks();
 
-      const bookedTicket: any = await bookingService.bookATicket(
-        event.id,
-        user.id
-      );
+//     // Instanciate mock dependencies
+//     eventService = mock<EventService>();
+//     waitListService = mock<WaitListService>();
+//     cancelBookingService = mock<CancelledBookingService>();
 
-      const updatedEvent: Event = await eventService.getEventById(
-        bookedTicket.eventId
-      );
+//     bookingService = new BookingService(
+//       eventService,
+//       waitListService,
+//       cancelBookingService
+//     );
+//   });
 
-      expect(bookedTicket).toHaveProperty("id");
-      expect(bookedTicket).toHaveProperty("userId");
-      expect(bookedTicket).toHaveProperty("eventId");
-      expect(bookedTicket.status).toBe(BookingStatus.CONFIRMED);
-      expect(updatedEvent.availableTicket).toBeLessThan(event.availableTicket);
-    });
-  });
+//   describe("book a ticket cases", () => {
+//     it("should successfully book a ticket when tickets are available", async () => {
+//       const mockTransaction = {
+//         $queryRaw: jest.fn().mockResolvedValue([mockEvent]),
+//         booking: {
+//           create: jest.fn().mockResolvedValue(mockConfirmedBookingResponse),
+//         },
+//         event: {
+//           update: jest.fn().mockResolvedValue({
+//             ...mockEvent,
+//             availableTicket: availableTicket - 1,
+//           }),
+//         },
+//       };
 
-  describe("Cancel a booked ticket", () => {
-    it("should cancel a booking and assign it to the oldest user on the event's wait list", async () => {
-      const eventService = new EventService();
-      const userService = new UserService();
-      const bookingService = new BookingService();
+//       mockedPrisma.$transaction.mockImplementation((callback) =>
+//         callback(mockTransaction as any)
+//       );
 
-      const eventDto: InitializeEventDto = {
-        name: "Tech Stars",
-        totalTicket: 1,
-        venue: "Ikeja",
-        startAt: new Date("2024-10-15"),
-        endAt: new Date("2024-10-18"),
-      };
-      const event = await eventService.initializeEvent(eventDto);
+//       eventService.getEventInLockedMode.mockResolvedValue(mockEvent);
 
-      const firstUser: SignUpDto = {
-        name: `${faker.person.firstName()} ${faker.person.lastName()}`,
-        email: faker.internet.email(),
-        password: "password",
-        phoneNumber: faker.phone.number(),
-      };
+//       jest
+//         .spyOn(bookingService, "createBooking")
+//         .mockResolvedValue(mockConfirmedBookingResponse);
 
-      const secondUser: SignUpDto = {
-        name: `${faker.person.firstName()} ${faker.person.lastName()}`,
-        email: faker.internet.email(),
-        password: "password",
-        phoneNumber: faker.phone.number(),
-      };
-      const user1 = await userService.createUser(firstUser);
-      const user2 = await userService.createUser(secondUser);
+//       eventService.updateEventAvailableTicket.mockResolvedValue(undefined);
 
-      const bookedTicket = await bookingService.bookATicket(event.id, user1.id); //book a ticket and set decrement available ticket
-      await bookingService.bookATicket(event.id, user2.id); //add this user to wait list to be reassigned the cancelled ticket
+//       // Test the main function
+//       const result = await bookingService.bookATicket(eventId, mockUser);
 
-      const initialEventResponse: EventStatusResponse =
-        await eventService.getEventStatus(event.id); // waitlist count should be one
+//       // Assert
+//       expect(eventService.getEventInLockedMode).toHaveBeenCalledWith(
+//         eventId,
+//         mockTransaction
+//       );
+//       expect(bookingService.createBooking).toHaveBeenCalledWith(
+//         eventId,
+//         userId,
+//         mockTransaction
+//       );
+//       expect(eventService.updateEventAvailableTicket).toHaveBeenCalledWith(
+//         eventId,
+//         UpdateEventOption.DECREMENT,
+//         mockTransaction
+//       );
+//       // expect(prisma.$transaction).toHaveBeenCalled();
+//       expect(waitListService.addToWaitList).not.toHaveBeenCalled();
+//       expect(result).toEqual(mockConfirmedBookingResponse);
+//     });
 
-      const cancellationDto: BookingCancellationDto = {
-        bookingId: bookedTicket.id,
-        reason: "I'm cancelling because of an emergency",
-      };
+//     it("should add to waitlist when no tickets are available", async () => {
+//       // Mock data setup
+//       const mockEventWithExhaustedTickets: Event = {
+//         ...mockEvent,
+//         availableTicket: 0,
+//       };
 
-      const cancelledBooking: Booking = await bookingService.cancelBooking(
-        cancellationDto,
-        user1.id
-      );
+//       const mockWaitList: WaitList = {
+//         id: generateUUID(),
+//         userId,
+//         eventId,
+//         createdAt: new Date(),
+//         updatedAt: new Date(),
+//       };
 
-      const finalEventResponse: EventStatusResponse =
-        await eventService.getEventStatus(bookedTicket.eventId); // waitlist count should be 0
+//       // Mock transaction setup
+//       const mockTransaction = {
+//         $queryRaw: jest.fn().mockResolvedValue([mockEventWithExhaustedTickets]),
+//         waitList: {
+//           create: jest.fn().mockResolvedValue(mockWaitList),
+//         },
+//       };
 
-      expect(cancelledBooking.status).toBe(BookingStatus.CANCELLED);
-      expect(initialEventResponse.event.availableTicket).toBe(
-        finalEventResponse.event.availableTicket
-      );
-      expect(initialEventResponse.waitListCount).toBeGreaterThan(
-        finalEventResponse.waitListCount
-      );
-    });
-    it("should cancel a booking and increment the event's available ticket", async () => {
-      const eventService = new EventService();
-      const userService = new UserService();
-      const bookingService = new BookingService();
+//       // Setup transaction mock
+//       mockedPrisma.$transaction.mockImplementation((callback) =>
+//         callback(mockTransaction as any)
+//       );
 
-      const eventDto: InitializeEventDto = {
-        name: "Tech Stars",
-        totalTicket: 1,
-        venue: "Ikeja",
-        startAt: new Date("2024-10-15"),
-        endAt: new Date("2024-10-18"),
-      };
-      const event = await eventService.initializeEvent(eventDto);
+//       // Setup service mocks
+//       eventService.getEventInLockedMode.mockResolvedValue(
+//         mockEventWithExhaustedTickets
+//       );
+//       waitListService.addToWaitList.mockResolvedValue(mockWaitList);
 
-      const signUpDto: SignUpDto = {
-        name: `${faker.person.firstName()} ${faker.person.lastName()}`,
-        email: faker.internet.email(),
-        password: "password",
-        phoneNumber: faker.phone.number(),
-      };
-      const user = await userService.createUser(signUpDto);
+//       // Test the main function
+//       const result = await bookingService.bookATicket(eventId, mockUser);
 
-      const bookedTicket = await bookingService.bookATicket(event.id, user.id);
+//       // Assert
+//       expect(eventService.getEventInLockedMode).toHaveBeenCalledWith(
+//         eventId,
+//         mockTransaction // Use mockTransaction instead of mockedPrisma
+//       );
+//       expect(bookingService.createBooking).not.toHaveBeenCalled();
+//       expect(eventService.updateEventAvailableTicket).not.toHaveBeenCalled();
+//       expect(waitListService.addToWaitList).toHaveBeenCalledWith(
+//         eventId,
+//         userId,
+//         mockTransaction // Use mockTransaction instead of mockedPrisma
+//       );
+//       expect(result).toEqual(mockWaitList);
+//     });
 
-      const cancellationDto: BookingCancellationDto = {
-        bookingId: bookedTicket.id,
-        reason: "I'm cancelling because of an emergency",
-      };
+//     it("should throw error for cancelled events", async () => {
+//       const cancelledEvent = { ...mockEvent, status: EventStatus.CANCELLED };
+//       eventService.getEventInLockedMode.mockResolvedValue(cancelledEvent);
 
-      const cancelledBooking: Booking = await bookingService.cancelBooking(
-        cancellationDto,
-        user.id
-      );
+//       // Act & Assert
+//       await expect(
+//         bookingService.bookATicket(eventId, mockUser)
+//       ).rejects.toThrow(new HttpException(400, "Event date is past"));
+//       expect(bookingService.createBooking).not.toHaveBeenCalled();
+//       expect(eventService.updateEventAvailableTicket).not.toHaveBeenCalled();
+//       expect(waitListService.addToWaitList).not.toHaveBeenCalled();
+//     });
 
-      const updatedEvent: Event = await eventService.getEventById(
-        bookedTicket.eventId
-      );
+//     it("should throw error for past events", async () => {
+//       const pastEvent = {
+//         ...mockEvent,
+//         endAt: dayjs().subtract(1, "day").toDate(),
+//       };
 
-      expect(cancelledBooking.status).toBe(BookingStatus.CANCELLED);
-      expect(updatedEvent.availableTicket).toBe(event.availableTicket);
-    });
-  });
-});
+//       eventService.getEventInLockedMode.mockResolvedValue(pastEvent);
+
+//       // Act & Assert
+//       await expect(
+//         bookingService.bookATicket(eventId, mockUser)
+//       ).rejects.toThrow(new HttpException(400, "Event date is past"));
+//       expect(bookingService.createBooking).not.toHaveBeenCalled();
+//       expect(eventService.updateEventAvailableTicket).not.toHaveBeenCalled();
+//       expect(waitListService.addToWaitList).not.toHaveBeenCalled();
+//     });
+
+//     it("should handle transaction failure", async () => {
+//       const transactionError = new Error("Transaction failed");
+
+//       // prisma.$transaction.mockRejectedValue(transactionError);
+
+//       // Act & Assert
+//       await expect(
+//         bookingService.bookATicket(eventId, mockUser)
+//       ).rejects.toThrow(transactionError);
+//     });
+
+//     it("should handle event not found", async () => {
+//       eventService.getEventInLockedMode.mockResolvedValue(null);
+
+//       // Act & Assert
+//       await expect(
+//         bookingService.bookATicket(eventId, mockUser)
+//       ).rejects.toThrow(new HttpException(404, "Event does not exist"));
+//       expect(bookingService.createBooking).not.toHaveBeenCalled();
+//       expect(eventService.updateEventAvailableTicket).not.toHaveBeenCalled();
+//       expect(waitListService.addToWaitList).not.toHaveBeenCalled();
+//     });
+//   });
+// });

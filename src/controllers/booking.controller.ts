@@ -5,7 +5,7 @@ import { RequestWithUser } from "@/interfaces/auth.interface";
 import Container from "typedi";
 
 export class BookingController {
-  public bookingService = Container.get(BookingService);
+  private bookingService = Container.get(BookingService);
 
   public bookATicket = async (
     req: RequestWithUser,
@@ -14,8 +14,11 @@ export class BookingController {
   ) => {
     try {
       const { eventId } = req.body;
-      const { id } = req.user;
-      const response: any = await this.bookingService.bookATicket(eventId, id);
+      const { user } = req;
+      const response: any = await this.bookingService.bookATicket(
+        eventId,
+        user
+      );
 
       const message: string = response.status
         ? "Ticket booked successfully"
@@ -34,8 +37,8 @@ export class BookingController {
   ) => {
     try {
       const bookingCancellationData: BookingCancellationDto = req.body;
-      const { id } = req.user;
-      await this.bookingService.cancelBooking(bookingCancellationData, id);
+      const { user } = req;
+      await this.bookingService.cancelBooking(bookingCancellationData, user);
       res.status(200).json({ message: "Booking cancelled successfully" });
     } catch (error) {
       next(error);

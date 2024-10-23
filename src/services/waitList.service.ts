@@ -4,7 +4,7 @@ import { Service } from "typedi";
 
 @Service()
 export class WaitListService {
-  public waitList = prisma.waitList;
+  private waitList = prisma.waitList;
 
   public async addToWaitList(
     eventId: string,
@@ -28,7 +28,7 @@ export class WaitListService {
     return waitList;
   }
 
-  public async getOldestUserOnEventWaitList(
+  public async getOldestWaitListEntry(
     eventId: string
   ): Promise<WaitList> {
     const oldestOnTheList: WaitList = await this.waitList.findFirst({

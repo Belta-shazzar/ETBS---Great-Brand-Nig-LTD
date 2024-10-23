@@ -1,70 +1,91 @@
 import request from "supertest";
-import { PrismaClient, Event } from "@prisma/client";
+import { Event } from "@prisma/client";
 import { App } from "../../src/app";
 import { EventRoute } from "../../src/routes/event.route";
-
-let prisma: PrismaClient;
-
-beforeAll(async () => {
-  prisma = new PrismaClient();
-  await prisma.$connect();
-});
-
-afterAll(async () => {
-//   Clean up database after test
-  // await prisma.event.deleteMany();
-
-  await prisma.$disconnect();
-});
+import prisma from "../../src/config/prisma";
+import { AuthRoute } from "../../src/routes/auth.route";
+import { faker } from "@faker-js/faker";
+import { SignUpDto } from "../../src/dtos/auth.dto";
+import { generateUUID } from "../util";
 
 describe("Event integration test", () => {
+  afterAll(async () => {
+    //   Clean up database after test
+    await prisma.event.deleteMany();
+    await prisma.user.deleteMany();
+
+    await prisma.$disconnect();
+  });
+
   const eventRoute: EventRoute = new EventRoute();
-  const app: App = new App([eventRoute]);
+  const authRoute: AuthRoute = new AuthRoute();
+  
+  const app: App = new App([eventRoute, authRoute]);
+
+  let authToken: string;
   let event: Event;
 
   describe("[POST] /events/initialize", () => {
+    const eventData = {
+      name: "Test Event",
+      totalTicket: 1,
+      venue: "Test event venue",
+      startAt: "2026-10-15T14:30:00Z",
+      endAt: "2026-10-18T14:30:00Z",
+    };
     it("should return an error if invalid data is passed", async () => {
-      const eventData = {
-        name: "Father and Son",
-        totalTicket: 0, //Total ticket must be greater than 0
-        venue: "Ikate, Surulere, Lagos",
-        startAt: "2024-10-15T14:30:00Z",
-        endAt: "2024-10-18T14:30:00Z",
+      const signUpDto: SignUpDto = {
+        name: `${faker.person.firstName()} ${faker.person.lastName()}`,
+        email: faker.internet.email(),
+        phoneNumber: faker.phone.number(),
+        password: "password",
       };
-      const response = request(app.getServer())
-        .post(`${eventRoute.path}/initialize`)
-        .send(eventData);
 
-      return response.expect(400);
+      const signUpResponse = await request(app.getServer())
+        .post(`${authRoute.path}/sign-up`)
+        .send(signUpDto);
+
+      authToken = signUpResponse.body.data.token;
+
+      const invalidEventDataconst = {
+        ...eventData,
+        totalTicket: 0,
+      };
+
+      const response = await request(app.getServer())
+        .post(`${eventRoute.path}/initialize`)
+        .set("Authorization", `Bearer ${authToken}`)
+        .send(invalidEventDataconst);
+
+      expect(response.status).toBe(400);
     });
 
     it("should return a 201", async () => {
-      const eventData = {
-        name: "Father and Son",
-        totalTicket: 3, //Total ticket must be greater than 0
-        venue: "Ikate, Surulere, Lagos",
-        startAt: new Date("2026-10-15"),
-        endAt: new Date("2026-10-18"),
-      };
-
-      const response = request(app.getServer())
+      const response = await request(app.getServer())
         .post(`${eventRoute.path}/initialize`)
+        .set("Authorization", `Bearer ${authToken}`)
         .send(eventData);
-      event = (await response).body.data;
-      return response.expect(201);
+
+      event = response.body.data;
+
+      expect(response.status).toBe(201);
     });
   });
   describe("[GET] /events/status", () => {
     it("should return a 404 if id is not found", async () => {
-      const invalidId = "c2bd3333-c587-4f4e-83c8-c8c3ece7c042";
-      return request(app.getServer())
-        .get(`${eventRoute.path}/status/${invalidId}`)
-        .expect(404);
+      const invalidId = generateUUID();
+      const response = await request(app.getServer()).get(
+        `${eventRoute.path}/status/${invalidId}`
+      );
+
+      expect(response.status).toBe(404);
     });
     it("should return a 200", async () => {
-      return request(app.getServer())
-        .get(`${eventRoute.path}/status/${event.id}`)
-        .expect(200);
+      const response = await request(app.getServer()).get(
+        `${eventRoute.path}/status/${event.id}`
+      );
+
+      expect(response.status).toBe(200);
     });
   });
 });

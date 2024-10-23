@@ -16,7 +16,6 @@ model Event {
   venue           String
   totalTicket     Int
   availableTicket Int
-  managerId       String      @db.Uuid
   startAt         DateTime
   endAt           DateTime
   status          EventStatus
