@@ -11,6 +11,7 @@ import { generateUUID } from "../util";
 describe("Event integration test", () => {
   afterAll(async () => {
     //   Clean up database after test
+    await prisma.booking.deleteMany();
     await prisma.event.deleteMany();
     await prisma.user.deleteMany();
 
@@ -19,7 +20,7 @@ describe("Event integration test", () => {
 
   const eventRoute: EventRoute = new EventRoute();
   const authRoute: AuthRoute = new AuthRoute();
-  
+
   const app: App = new App([eventRoute, authRoute]);
 
   let authToken: string;

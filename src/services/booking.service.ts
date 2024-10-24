@@ -83,7 +83,7 @@ export class BookingService {
     user: User
   ): Promise<Booking> {
     const checkBooking = await this.booking.findUnique({
-      where: { id: cancellationDto.bookingId },
+      where: { id: cancellationDto.bookingId, userId: user.id },
     });
     if (!checkBooking || checkBooking.status === BookingStatus.CANCELLED)
       throw new HttpException(404, "Ticket not found");

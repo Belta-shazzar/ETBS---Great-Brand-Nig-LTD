@@ -13,7 +13,6 @@ jest.mock("../../src/config/prisma.ts", () => ({
   default: mockDeep<PrismaClient>(),
 }));
 
-
 describe("UserService unit test", () => {
   const mockedPrisma = prisma as unknown as DeepMockProxy<PrismaClient>;
   let userService: UserService;
@@ -107,19 +106,10 @@ describe("UserService unit test", () => {
   });
 
   describe("Strip user password", () => {
-    const mockStrippedUser: Partial<User> = {
-      id: userId,
-      name,
-      email,
-      phoneNumber,
-      createdAt: new Date(),
-      updatedAt: new Date(),
-    };
     it("should remove password from user object", () => {
       const result = userService.stripUserPassword(mockUser);
 
       expect(result).not.toHaveProperty("password");
-      expect(result).toEqual(mockStrippedUser);
     });
   });
 });

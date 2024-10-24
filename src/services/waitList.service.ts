@@ -30,7 +30,7 @@ export class WaitListService {
 
   public async getOldestWaitListEntry(
     eventId: string
-  ): Promise<WaitList> {
+  ): Promise<WaitList | null> {
     const oldestOnTheList: WaitList = await this.waitList.findFirst({
       where: {
         eventId,
