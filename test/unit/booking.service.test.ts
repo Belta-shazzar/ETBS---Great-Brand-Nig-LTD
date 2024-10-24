@@ -20,6 +20,7 @@ import { UpdateEventOption } from "../../src/enum/event.enum";
 import { HttpException } from "../../src/exceptions/http.exception";
 import { BookingCancellationDto } from "../../src/dtos/booking.dto";
 
+// Mock prisma config module
 jest.mock("../../src/config/prisma.ts", () => ({
   __esModule: true,
   default: mockDeep<PrismaClient>(),
@@ -36,7 +37,7 @@ describe("BookingService unit test", () => {
   let waitListService: MockProxy<WaitListService>;
   let cancelBookingService: MockProxy<CancelledBookingService>;
 
-  // Mock user details
+  // Mocked user details
   const userId: string = generateUUID();
   const userName: string = `${faker.person.firstName()} ${faker.person.lastName()}`;
   const email: string = faker.internet.email();
@@ -52,7 +53,7 @@ describe("BookingService unit test", () => {
     updatedAt: new Date(),
   };
 
-  // Mock event details
+  // Mocked event details
   const eventId: string = generateUUID();
   const eventName: string = "Test event";
   const venue: string = "event_venue";
@@ -76,7 +77,7 @@ describe("BookingService unit test", () => {
     deletedAt: null,
   };
 
-  // Mock booking details
+  // Mocked booking details
   const bookingId: string = generateUUID();
 
   const mockConfirmedBookingResponse: Booking = {
@@ -160,7 +161,7 @@ describe("BookingService unit test", () => {
 
       eventService.updateEventAvailableTicket.mockResolvedValue(undefined);
 
-      // Test the main function
+      // Execute bookATicket
       const result = await bookingService.bookATicket(eventId, mockUser);
 
       // Assert
@@ -178,13 +179,11 @@ describe("BookingService unit test", () => {
         UpdateEventOption.DECREMENT,
         mockTransaction
       );
-      // expect(prisma.$transaction).toHaveBeenCalled();
       expect(waitListService.addToWaitList).not.toHaveBeenCalled();
       expect(result).toEqual(mockConfirmedBookingResponse);
     });
 
     it("should add to waitlist when no tickets are available", async () => {
-      // Mock data setup
       const mockEventWithExhaustedTickets: Event = {
         ...mockEvent,
         availableTicket: 0,
@@ -206,7 +205,6 @@ describe("BookingService unit test", () => {
         },
       };
 
-      // Setup transaction mock
       mockedPrisma.$transaction.mockImplementation((callback) =>
         callback(mockTransaction as any)
       );
@@ -222,20 +220,20 @@ describe("BookingService unit test", () => {
 
       waitListService.addToWaitList.mockResolvedValue(mockWaitList);
 
-      // Test the main function
+      // Execute bookATicket
       const result = await bookingService.bookATicket(eventId, mockUser);
 
       // Assert
       expect(eventService.getEventInLockedMode).toHaveBeenCalledWith(
         eventId,
-        mockTransaction // Use mockTransaction instead of mockedPrisma
+        mockTransaction
       );
       expect(bookingService.createBooking).not.toHaveBeenCalled();
       expect(eventService.updateEventAvailableTicket).not.toHaveBeenCalled();
       expect(waitListService.addToWaitList).toHaveBeenCalledWith(
         eventId,
         userId,
-        mockTransaction // Use mockTransaction instead of mockedPrisma
+        mockTransaction
       );
       expect(result).toEqual(mockWaitList);
     });
@@ -258,7 +256,7 @@ describe("BookingService unit test", () => {
         .spyOn(bookingService, "createBooking")
         .mockResolvedValue(mockConfirmedBookingResponse);
 
-      // Act & Assert
+      // Execute & Assert
       await expect(
         bookingService.bookATicket(eventId, mockUser)
       ).rejects.toThrow(new HttpException(400, "Event date is past"));
@@ -288,7 +286,7 @@ describe("BookingService unit test", () => {
         .spyOn(bookingService, "createBooking")
         .mockResolvedValue(mockConfirmedBookingResponse);
 
-      // Act & Assert
+      // Execute & Assert
       await expect(
         bookingService.bookATicket(eventId, mockUser)
       ).rejects.toThrow(new HttpException(400, "Event date is past"));
@@ -486,6 +484,7 @@ describe("BookingService unit test", () => {
     });
 
     it("should throw error if user tries to cancel someone else's booking", async () => {
+      // Mock transaction setup
       const mockTransaction = {
         booking: {
           update: jest

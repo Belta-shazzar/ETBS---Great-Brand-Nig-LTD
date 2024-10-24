@@ -14,12 +14,16 @@ jest.mock("../../src/config/prisma.ts", () => ({
   default: mockDeep<PrismaClient>(),
 }));
 
-
 describe("EventService unit test", () => {
+  // Mocked prismaClient
   const mockedPrisma = prisma as unknown as DeepMockProxy<PrismaClient>;
+
   let eventService: EventService;
+
+  // Mocked dependency
   let waitListService: MockProxy<WaitListService>;
 
+  // Mocked Event details
   const eventId: string = generateUUID();
   const userId: string = generateUUID();
   const eventName: string = "Test event";
@@ -47,6 +51,7 @@ describe("EventService unit test", () => {
   beforeEach(() => {
     jest.clearAllMocks();
 
+    // Instanciate mock dependency
     waitListService = mock<WaitListService>();
     eventService = new EventService(waitListService);
   });
@@ -63,8 +68,10 @@ describe("EventService unit test", () => {
 
       mockedPrisma.event.create.mockResolvedValue(mockEvent);
 
+      // Execute initializeEvent
       const result = await eventService.initializeEvent(eventDto, userId);
 
+      // Verify
       expect(mockedPrisma.event.create).toHaveBeenCalledWith({
         data: {
           ...eventDto,
@@ -81,8 +88,10 @@ describe("EventService unit test", () => {
     it("should return an event when found", async () => {
       mockedPrisma.event.findUnique.mockResolvedValue(mockEvent);
 
+      // Execute getEventById
       const result = await eventService.getEventById(eventId);
 
+      // Verify
       expect(mockedPrisma.event.findUnique).toHaveBeenCalledWith({
         where: { id: eventId },
       });
@@ -92,6 +101,7 @@ describe("EventService unit test", () => {
     it("should throw HttpException when user is not found", async () => {
       mockedPrisma.event.findUnique.mockResolvedValue(null);
 
+      // Execute and verify
       await expect(eventService.getEventById(eventId)).rejects.toThrow(
         new HttpException(404, "Event does not exist")
       );
@@ -106,16 +116,19 @@ describe("EventService unit test", () => {
     let mockTransaction: any;
     it("should return an event in locked mode when found", async () => {
       jest.spyOn(eventService, "getEventById").mockResolvedValue(mockEvent);
+
       // Create a mock transaction that returns the mocked query result
       mockTransaction = {
         $queryRaw: jest.fn().mockResolvedValue([mockEvent]),
       };
 
+      // Execute getEventInLockedMode
       const result = await eventService.getEventInLockedMode(
         mockEvent.id,
         mockTransaction
       );
 
+      // Verify
       expect(eventService.getEventById).toHaveBeenCalledWith(mockEvent.id);
       expect(mockTransaction.$queryRaw).toHaveBeenCalled();
       expect(result).toEqual(mockEvent);
@@ -126,6 +139,7 @@ describe("EventService unit test", () => {
         $queryRaw: jest.fn(),
       };
 
+      // Execute and verify
       await expect(
         eventService.getEventInLockedMode(mockEvent.id, mockTransaction)
       ).rejects.toThrow(new HttpException(404, "Event does not exist"));
@@ -155,8 +169,10 @@ describe("EventService unit test", () => {
       jest.spyOn(eventService, "getEventById").mockResolvedValue(mockEvent);
       waitListService.getWaitListByEventId.mockResolvedValue(mockWaitList);
 
+      // Execute getEventStatus
       const result = await eventService.getEventStatus(mockEvent.id);
 
+      // Verify
       expect(eventService.getEventById).toHaveBeenCalledWith(mockEvent.id);
       expect(waitListService.getWaitListByEventId).toHaveBeenCalledWith(
         mockEvent.id
@@ -180,6 +196,7 @@ describe("EventService unit test", () => {
     });
 
     it("should throw error when event is not found", async () => {
+      // Execute and verify
       await expect(eventService.getEventStatus(mockEvent.id)).rejects.toThrow(
         new HttpException(404, "Event does not exist")
       );
@@ -197,12 +214,14 @@ describe("EventService unit test", () => {
         },
       };
 
+      // Execute updateEventAvailableTicket
       await eventService.updateEventAvailableTicket(
         mockEvent.id,
         UpdateEventOption.INCREMENT,
         mockTransaction
       );
 
+      // Verify
       expect(mockTransaction.event.update).toHaveBeenCalledWith({
         where: { id: mockEvent.id },
         data: {
@@ -221,12 +240,14 @@ describe("EventService unit test", () => {
         },
       };
 
+      // Execute updateEventAvailableTicket
       await eventService.updateEventAvailableTicket(
         mockEvent.id,
         UpdateEventOption.DECREMENT,
         mockTransaction
       );
 
+      // Verify
       expect(mockTransaction.event.update).toHaveBeenCalledWith({
         where: { id: mockEvent.id },
         data: {

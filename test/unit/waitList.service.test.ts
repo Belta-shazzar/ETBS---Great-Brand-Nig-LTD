@@ -4,6 +4,7 @@ import prisma from "../../src/config/prisma";
 import { WaitListService } from "../../src/services/waitList.service";
 import { generateUUID } from "../util";
 
+// Mock prisma config module
 jest.mock("../../src/config/prisma.ts", () => ({
   __esModule: true,
   default: mockDeep<PrismaClient>(),
@@ -32,18 +33,21 @@ describe("WaitListService", () => {
 
   describe("Add to waitlist case", () => {
     it("should successfully add user to wait list", async () => {
+      // Mock transaction setup
       const mockTransaction = {
         waitList: {
           create: jest.fn().mockResolvedValue(mockWaitList),
         },
       };
 
+      // Execute addToWaitList
       const result = await waitListService.addToWaitList(
         mockWaitList.eventId,
         mockWaitList.userId,
         mockTransaction
       );
 
+      // Verify
       expect(result).toEqual(mockWaitList);
       expect(mockTransaction.waitList.create).toHaveBeenCalledWith({
         data: {

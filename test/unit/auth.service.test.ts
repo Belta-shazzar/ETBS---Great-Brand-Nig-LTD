@@ -1,5 +1,5 @@
 import { MockProxy, mock } from "jest-mock-extended";
-import { PrismaClient, User } from "@prisma/client";
+import { User } from "@prisma/client";
 import { AuthService } from "../../src/services/auth.service";
 import { UserService } from "../../src/services/user.service";
 import { HttpException } from "../../src/exceptions/http.exception";
@@ -24,7 +24,6 @@ jest.mock("jsonwebtoken", () => ({
 describe("AuthService unit test", () => {
   let authService: AuthService;
   let userService: MockProxy<UserService>;
-  // let prisma: MockProxy<PrismaClient>;
 
   const userId = generateUUID();
   const name = `${faker.person.firstName()} ${faker.person.lastName()}`;
@@ -54,7 +53,6 @@ describe("AuthService unit test", () => {
   beforeEach(() => {
     jest.clearAllMocks();
 
-    // prisma = mock<PrismaClient>();
     userService = mock<UserService>();
     authService = new AuthService(userService);
   });

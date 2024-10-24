@@ -14,9 +14,11 @@ jest.mock("../../src/config/prisma.ts", () => ({
 }));
 
 describe("UserService unit test", () => {
+  // Mocked prismaClient
   const mockedPrisma = prisma as unknown as DeepMockProxy<PrismaClient>;
   let userService: UserService;
 
+  // Mocked user details
   const userId: string = generateUUID();
   const email: string = faker.internet.email();
   const name: string = `${faker.person.firstName()} ${faker.person.lastName()}`;
@@ -95,6 +97,7 @@ describe("UserService unit test", () => {
     it("should throw HttpException when user is not found", async () => {
       mockedPrisma.user.findUnique.mockResolvedValue(null);
 
+      // Execute and verify
       await expect(userService.getUserById(userId)).rejects.toThrow(
         new HttpException(404, "User does not exist")
       );

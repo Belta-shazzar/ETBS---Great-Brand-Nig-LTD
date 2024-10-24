@@ -29,17 +29,20 @@ describe("cancelled-BookingService unit test", () => {
         reason: reasonForCancellation,
       };
 
+      // Mock transaction setup
       mockTransaction = {
         cancelledBooking: {
           create: jest.fn().mockResolvedValue(mockedCancelledBooking),
         },
       };
 
+      // Execute createCancellationRecord
       await cancelledBookingService.createCancellationRecord(
         cancellationDto,
         mockTransaction
       );
 
+      // Verify
       expect(mockTransaction.cancelledBooking.create).toHaveBeenCalledWith({
         data: cancellationDto,
       });
