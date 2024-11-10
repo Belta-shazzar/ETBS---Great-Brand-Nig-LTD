@@ -13,13 +13,14 @@ FROM base AS development
 
 ENV NODE_ENV=development
 
-CMD yarn prisma:migrate && yarn dev
+# Run prisma migrate then start the app
+CMD yarn prisma:migrate && yarn dev 
 
 FROM base AS test
 
 ENV NODE_ENV=test
 
-CMD ["yarn", "test"]
+CMD yarn prisma:test:migrate && yarn test
 
 
 FROM base AS builder
