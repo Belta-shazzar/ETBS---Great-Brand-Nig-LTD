@@ -12,6 +12,7 @@ import { ErrorMiddleware } from "@/middlewares/error.middleware";
 import { HttpException } from "./exceptions/http.exception";
 import ResponseInterceptor from "./middlewares/transform-response.middleware";
 import rateLimit from "express-rate-limit";
+import prisma from "./config/prisma";
 
 export class App {
   public app: express.Application;
@@ -30,10 +31,18 @@ export class App {
   }
 
   public listen() {
-    this.app.listen(this.port, () => {
-      logger.info(`======= ENV: ${this.env} ========`);
-      logger.info(`🚀 App listening on the port ${this.port}`);
-    });
+    prisma
+      .$connect()
+      .then(() => {
+        logger.info("🟢 Database connection successful");
+        this.app.listen(this.port, () => {
+          logger.info(`======= ENV: ${this.env} ========`);
+          logger.info(`🚀 App listening on the port ${this.port}`);
+        });
+      })
+      .catch((error) => {
+        logger.error("An error occurred: ", error);
+      });
   }
 
   public getServer() {

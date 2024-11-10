@@ -6,8 +6,8 @@ import {
   Booking,
   BookingStatus,
   WaitList,
+  EventStatus
 } from "@prisma/client";
-import { EventStatus } from "@prisma/client";
 import dayjs from "dayjs";
 import { BookingService } from "../../src/services/booking.service";
 import { EventService } from "../../src/services/event.service";
