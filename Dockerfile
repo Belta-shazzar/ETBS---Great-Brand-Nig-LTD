@@ -19,11 +19,14 @@ CMD yarn prisma:migrate && yarn dev
 FROM base AS test
 
 ENV NODE_ENV=test
+# RUN yarn prisma:generate
 
-CMD yarn prisma:test:migrate && yarn test
-
+# Run prisma migrate and generate for test environment then start the app
+CMD yarn prisma:migrate:test && yarn prisma:generate && yarn test
 
 FROM base AS builder
+
+RUN yarn prisma:generate
 
 RUN yarn build
 
@@ -34,16 +37,13 @@ WORKDIR /usr/src/app
 COPY package*.json yarn.lock ./
 RUN yarn install --production --frozen-lockfile
 
-# COPY --from=builder /usr/src/app/node_modules ./node_modules
 COPY --from=builder /usr/src/app/dist ./dist
-COPY --from=builder /usr/src/app/src/prisma ./dist
-# COPY --from=builder /usr/src/app/package*.json ./
 COPY --from=builder /usr/src/app/.env ./
+COPY --from=builder /usr/src/app/entrypoint.sh ./
+COPY --from=builder /usr/src/app/prisma ./
 
-# RUN yarn prisma:migrate
-# RUN yarn prisma:generate
+RUN chmod +x entrypoint.sh
 
 EXPOSE 3000
 
-# CMD ["sh", "entrypoint.sh"]
-CMD ["yarn", "start"]
+CMD ["sh", "entrypoint.sh"]

@@ -22,8 +22,10 @@ Docker and Git are Prerequisites.
 ## Test Environment Setup
 - Complete [Local Development Setup](#local-development-setup)
 - Copy all values except *DATABASE_URL* from .env file to .env.test
-- Run `yarn prisma:test:migrate` to sync the prisma models to the test database
+- Run `yarn prisma:migrate:test` to sync the prisma models to the test database
 - Run `yarn test` to run test
+
+## Running the app on docker
 
 ## Entity Relational Diagram
 

@@ -31,6 +31,20 @@ services:
     networks:
       - backend
 
+  etbs-prod:
+    build:
+      context: .
+      target: production
+    ports:
+      - "3000:3000"
+    env_file:
+      - .env
+    depends_on:
+      postgres:
+        condition: service_healthy
+    networks:
+      - backend
+
   postgres:
     container_name: postgres
     image: postgres:15
