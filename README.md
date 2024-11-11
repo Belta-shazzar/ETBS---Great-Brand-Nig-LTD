@@ -26,6 +26,14 @@ Docker and Git are Prerequisites.
 - Run `yarn test` to run test
 
 ## Running the app on docker
+Docker is a Prerequisite.
+
+- Clone the repository
+- Create a `.env` file and fill in the required fields. See `.env.example` for blueprint.
+- Run `docker compose up --build etbs-dev` to spin up the development container
+- Run `docker compose up --build etbs-test` to spin up the test container
+- Run `docker compose up --build etbs-prod` to spin up the production container
+
 
 ## Entity Relational Diagram
 
