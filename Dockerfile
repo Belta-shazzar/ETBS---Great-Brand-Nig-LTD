@@ -38,7 +38,7 @@ COPY package*.json yarn.lock ./
 RUN yarn install --production --frozen-lockfile
 
 COPY --from=builder /usr/src/app/dist ./dist
-COPY --from=builder /usr/src/app/.env ./
+# COPY --from=builder /usr/src/app/.env ./
 COPY --from=builder /usr/src/app/entrypoint.sh ./
 COPY --from=builder /usr/src/app/prisma ./
 
