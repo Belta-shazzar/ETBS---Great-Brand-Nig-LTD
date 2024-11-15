@@ -16,19 +16,19 @@ jobs:
       postgres:
         image: postgres:15
         env:
-          POSTGRES_DB: testdb
-          POSTGRES_USER: testuser
-          POSTGRES_PASSWORD: testpassword
+          POSTGRES_DB: test_db
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: password
         ports:
           - 5432:5432
         options: >-
-          --health-cmd="pg_isready -U testuser"
+          --health-cmd="pg_isready -U postgres"
           --health-interval=10s
           --health-timeout=5s
           --health-retries=5
 
     env:
-      DATABASE_URL: "postgresql://testuser:testpassword@localhost:5432/testdb"
+      DATABASE_URL: "postgresql://postgres:password@localhost:5432/test_db"
       NODE_ENV: "test"
 
     steps:
@@ -51,3 +51,26 @@ jobs:
 
       - name: Build application
         run: yarn build
+  docker-build-and-push:
+    needs: build
+    runs-on: ubuntu-latest
+    if: github.ref == 'refs/heads/master'
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-actions@v2
+
+      - name: Login to Docker Hub
+        uses: docker/login-action@v2
+        with:
+          username: ${{ secrets.DOCKER_USRNAME }}
+          password: ${{ secrets.DOCKER_PASSWORD }}
+
+      - name: Build and Push Docker Images
+        uses: docker/build-push-action@v2
+        with:
+          context: .
+          push: true
+          tags: ${{ secrets.DOCKER_USRNAME }}/etbs-great_brands:latest
