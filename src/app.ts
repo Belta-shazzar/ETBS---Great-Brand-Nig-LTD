@@ -28,7 +28,6 @@ export class App {
     this.initializeResponseTransform();
     this.initializeRoutes(routes);
     this.initializeErrorHandling();
-    
   }
 
   public listen() {
